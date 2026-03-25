@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.class
+.venv/
+venv/
+ENV/
+.env
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# AI Model & Data (Large Files)
+*.onnx
+best_openvino_model/
+backend/data/
+samples/
+*.mp4
+
+# System / IDEs
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Removing the heavy files from the repo
+frontend/node_modules/*
+samples/*
+test/*
+backend/data/*
+backend/output/*
+
