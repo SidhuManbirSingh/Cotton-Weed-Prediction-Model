@@ -3,6 +3,7 @@ server.py
 ---------
 Flask REST API for AI Media Processing (Cotton Weed Detection).
 Supports OpenVINO GPU acceleration and H.264 web-optimized video.
+I don't have NVIDIA GPUs, so this is designed to run on CPU/GPU-agnostic OpenVINO for broad compatibility.
 """
 
 import io
@@ -16,35 +17,53 @@ from flask import Flask, request, jsonify, send_file, abort
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
-# Resolve backend root (parent of this file's directory)
 _SERVER_DIR  = Path(__file__).resolve().parent
+# Resolve backend root (parent of this file's directory)
+# Server defaults to serving media from a "data" folder at the backend root, which contains uploads, frames, annotated, and output subfolders.
+# It's important to keep this structure organized, especially since we dynamically create job-specific subfolders in the output directory for results and datasets.
+
 _BACKEND_DIR = _SERVER_DIR.parent
+# Focus over the backend folder, like cd ..
 
 import sys
-sys.path.insert(0, str(_BACKEND_DIR.parent))  # project root on path
+sys.path.insert(0, str(_BACKEND_DIR.parent))  
+# project root on path; main directories with access to each other
+# Helpful for relative imports in scripts and utils, and allows us to run this server.py directly without worrying about PYTHONPATH or package structure.
+
+
+# Importing the variables from various modules after adjusting sys.path
 
 from backend.utils.path_manager import (
     ensure_dirs, get_upload_path, get_frames_path,
     get_annotated_path, get_output_video_path, get_job_dataset_path,
     get_job_output_path, UPLOADS_DIR, OUTPUT_DIR, ANNOTATED_DIR, DATA_DIR
 )
+
 from backend.utils.file_naming import generate_timestamp
 from backend.scripts.video2image import extract_frames
 from backend.scripts.annotation  import annotate_frames, annotate_single_image
 from backend.scripts.convert      import images_to_video
 
 # ---------------------------------------------------------------------------
-app = Flask(__name__)
-CORS(app)
-ensure_dirs()
+app = Flask(__name__) # Added __name__ for working in any name even if not run as main
+CORS(app) # Allowing frontend calls 
+ensure_dirs() # Safety Check
 
 ALLOWED_IMAGE_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 ALLOWED_VIDEO_EXT = {".mp4", ".avi", ".mov", ".mkv"}
 ALLOWED_EXT       = ALLOWED_IMAGE_EXT | ALLOWED_VIDEO_EXT
 
+# -----------------------------------------------------------------------------
+
+# In-memory job tracking 
+# Each job_id maps to a dict with keys: status, message, result, progress
+# Added _ before _jobs to indicate it's a private variable, 
+# and a lock for thread safety since jobs are updated from worker threads.
+
 _jobs: dict = {}
 _jobs_lock = threading.Lock()
-
+# Mutex Lock to ensure thread-safe access to the _jobs dictionary
+# I learned about this in the my professor course on Operating Systems COMP 340 
 
 def _set_job(job_id: str, status: str, message: str = "", result: dict = None, progress: dict = None):
     with _jobs_lock:
@@ -60,20 +79,28 @@ def _set_job(job_id: str, status: str, message: str = "", result: dict = None, p
 # Routes
 # ---------------------------------------------------------------------------
 
+# API Endpoints:
+# POST /api/upload - Upload a video or image file.
+
+# In this endpoint is triggered on the upload of a file, 
+# it checks for the presence of the file in the request, 
+# validates its extension against allowed types, and saves it to the uploads directory. 
+# Replies in the JSON format with the filename, type (video or image), and a URL to access the uploaded file.
+
 @app.route("/api/upload", methods=["POST"])
 def upload():
     """Accept a file upload."""
-    if "file" not in request.files:
-        return jsonify({"error": "No file part"}), 400
-    file = request.files["file"]
-    if file.filename == "":
+    if "file" not in request.files: # IF USER DID NOT UPLOAD A FILE, RETURN ERROR -- AI SUGGESTS DONT UNDERSTAND WHY IT IS NEEDED 
+        return jsonify({"error": "No file part"}), 400 
+    file = request.files["file"] # Get the uploaded file from the request
+    if file.filename == "": # IF USER DID NOT SELECT A FILE, RETURN ERROR
         return jsonify({"error": "No file selected"}), 400
 
     ext = Path(file.filename).suffix.lower()
     if ext not in ALLOWED_EXT:
         return jsonify({"error": f"Unsupported: {ext}"}), 400
 
-    filename  = secure_filename(file.filename)
+    filename  = secure_filename(file.filename) # secure name to prevent directory traversal, etc.
     save_path = get_upload_path(filename)
     file.save(str(save_path))
 
@@ -82,67 +109,80 @@ def upload():
         "filename": filename,
         "type":     file_type,
         "url":      f"/api/media/uploads/{filename}",
-    })
+    }) # JSON response with the filename, type, and URL to access the uploaded file
 
 
+# API endpoint for processing a single image with inference and label export.
 @app.route("/api/process-image", methods=["POST"])
 def process_image():
     """Single-image inference with label export."""
     data     = request.get_json(force=True) or {}
     filename = data.get("filename", "")
-    if not filename: return jsonify({"error": "filename required"}), 400
+    if not filename: return jsonify({"error": "filename required"}), 400 
+    # This endpoint is designed for processing a single image file. 
 
     upload_path = get_upload_path(filename)
     if not upload_path.exists(): return jsonify({"error": "Not found"}), 404
 
+    # The confidence threshold for annotation can be passed in the request data, defaulting to 0.25 if not provided.
     conf = float(data.get("conf", 0.25))
+    # We generate a timestamp to create unique output filenames for the annotated image and label file.
     ts   = generate_timestamp()
 
-    try:
-        out_name = f"inference_{ts}_{upload_path.name}"
-        out_path = OUTPUT_DIR / out_name
+    try: 
+        out_name = f"inference_{ts}_{upload_path.name}" # Output filename includes timestamp and original name for traceability
+        out_path = OUTPUT_DIR / out_name 
         res = annotate_single_image(str(upload_path), str(out_path), conf=conf)
-
+        # res is expected to contain keys like "label_path" for the generated label file path
+        # res is the reason behind of the txt file that is generated with the same name as the image but with .txt extension, which contains the labels in YOLO format.
+        
         return jsonify({
             "annotated_url": f"/api/media/output/{out_name}",
             "label_url":     f"/api/media/output/{Path(res['label_path']).name}",
             "timestamp":     ts,
         })
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({"error": str(exc)}), 500 # 500 = Internal Server Error
 
-
+# For Video Processing, we have a more complex pipeline that involves multiple steps 
 @app.route("/api/process", methods=["POST"])
 def process():
     """Trigger the full video pipeline."""
-    data     = request.get_json(force=True) or {}
+    data     = request.get_json(force=True) or {} 
+    # Requesting JSON data from the client, which should include the filename of the uploaded video, frame interval for extraction, and confidence threshold for annotation
+
     filename = data.get("filename", "")
+    # File name is assisgned from the request data, and if it's not provided, we return a 400 Bad Request error indicating that the filename is required.
     if not filename: return jsonify({"error": "filename required"}), 400
 
+    # get_upload_path is a utility function that constructs the full path to the uploaded file based on the filename.
     upload_path = get_upload_path(filename)
     if not upload_path.exists(): return jsonify({"error": "Not found"}), 404
 
+    # Assigning default values for frame_interval and confidence threshold if they are not provided in the request data.
     frame_interval = int(data.get("frame_interval", 5))
     conf           = float(data.get("conf", 0.25))
+
+    # Unique Job ID is genberated
     job_id         = str(uuid.uuid4())
     _set_job(job_id, "queued", "Job queued")
 
     t = threading.Thread(
-        target=_run_pipeline,
-        args=(job_id, str(upload_path), frame_interval, conf),
-        daemon=True,
+        target=_run_pipeline, # _run_pipeline is expected to return the result of the video processing pipeline and update the job status accordingly. It takes the job_id, path to the uploaded video, frame interval, and confidence threshold as arguments.
+        args=(job_id, str(upload_path), frame_interval, conf), # Arguments passed to the target functions
+        daemon=True, # Background thread
     )
     t.start()
+ 
     return jsonify({"job_id": job_id, "status": "queued"})
 
 
 @app.route("/api/status/<job_id>", methods=["GET"])
-def status(job_id: str):
+def status(job_id: str): # Just returns the current status of a job based on its ID, including progress and any results if available.  
     with _jobs_lock:
         job = _jobs.get(job_id)
     if job is None: return jsonify({"error": "Unknown job"}), 404
-    return jsonify({"job_id": job_id, **job})
-
+    return jsonify({"job_id": job_id, **job}) # returns the job id and  whole job dict which has status, message, result, and progress keys in JSON format
 
 @app.route("/api/media/<path:filepath>", methods=["GET"])
 def media(filepath: str):
