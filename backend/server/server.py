@@ -184,6 +184,8 @@ def status(job_id: str): # Just returns the current status of a job based on its
     if job is None: return jsonify({"error": "Unknown job"}), 404
     return jsonify({"job_id": job_id, **job}) # returns the job id and  whole job dict which has status, message, result, and progress keys in JSON format
 
+
+# For the image and videos access or viewing, we have a media endpoint that serves files from the data directory.
 @app.route("/api/media/<path:filepath>", methods=["GET"])
 def media(filepath: str):
     """Serve media files (images, videos) from data directory."""
@@ -196,14 +198,14 @@ def media(filepath: str):
         return send_file(str(full_path), mimetype='video/mp4')
     return send_file(str(full_path))
 
-
+# Fow downlaoding the paired YOLO dataset for a specific job, we have an endpoint that dynamically zips the dataset directory and serves it as a downloadable file.
 @app.route("/api/download/dataset/<job_id>", methods=["GET"])
 def download_dataset(job_id: str):
     """Dynamically zip and download the paired YOLO dataset for a job."""
     with _jobs_lock:
         job = _jobs.get(job_id)
     if job is None or job["status"] != "done": return abort(404)
-
+    # On demand zipping of the dataset directory for the specified job. It checks if the job exists and is marked as "done". If not, it returns a 404 error. If the job is valid, it retrieves the dataset directory path from the job's result, creates an in-memory zip file of the dataset, and sends it as a downloadable response to the client.
     dataset_dir = job.get("result", {}).get("dataset_dir")
     if not dataset_dir: return abort(404)
 
@@ -215,9 +217,10 @@ def download_dataset(job_id: str):
 
     zip_buffer.seek(0)
     return send_file(zip_buffer, mimetype="application/zip", as_attachment=True,
-                   download_name=f"yolo_dataset_{job_id[:8]}.zip")
+                   download_name=f"yolo_dataset_{job_id[:8]}.zip") # Last 8 characters of the job ID are used in the zip file 
 
 
+# Downloading the folder endpoint is a more general version of the dataset download, allowing users to download any folder within the output directory. It performs a security check to ensure that the requested folder is indeed within the output directory to prevent unauthorized access to other parts of the filesystem. If the folder exists and is valid, it creates an in-memory zip file of the entire folder and serves it as a downloadable response.
 @app.route("/api/download/folder/<path:folder_name>", methods=["GET"])
 def download_folder(folder_name: str):
     """
@@ -251,11 +254,21 @@ def _run_pipeline(job_id: str, video_path: str, frame_interval: int, conf: float
     try:
         ts = generate_timestamp()
 
+        # Overall Pipeline Steps:
+        # 1. Extract frames from the uploaded video at the specified interval.
+        # 2. Annotate the extracted frames using the specified confidence threshold, and export the paired YOLO dataset (images + labels).
+        # 3. Rebuild the annotated frames into a web-optimized video using H.264 encoding via ffmpeg.
+        # 4. Generate a snapshot image from the first annotated frame for quick preview.
+        # 5. Update the job
+
         # Step 1 – Extract
         _set_job(job_id, "running", "Extracting frames…", progress={"step": "extracting", "percent": 0})
         frames_dir = get_frames_path(ts)
         info = extract_frames(video_path, str(frames_dir), frame_interval=frame_interval)
         saved_count, source_fps = info["saved_count"], info["source_fps"]
+
+        # getting the frames inside of the frame directory and counting them
+
 
         # Step 2 – Annotate + Dataset Export
         _set_job(job_id, "running", "Analyzing frames (GPU acceleration enabled)…",
@@ -263,6 +276,8 @@ def _run_pipeline(job_id: str, video_path: str, frame_interval: int, conf: float
         
         annotated_dir = get_annotated_path(ts)
         dataset_dir   = get_job_dataset_path(job_id)
+
+        # annotate_frames is expected to process all the extracted frames, save the annotated images to the annotated_dir, and export the corresponding YOLO label files to the dataset_dir. 
 
         def on_progress(current, total):
             pct = int(current / total * 100) if total else 0
