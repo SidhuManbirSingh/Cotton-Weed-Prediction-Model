@@ -1,10 +1,10 @@
-# 🛠️ Deployment and Usage Guide
+#  Deployment and Usage Guide
 
 This document outlines everything needed to set up, deploy, and run the **Inference of ML for Cotton-Weed Prediction** locally.
 
 ---
 
-## 📋 Prerequisites
+##  Prerequisites
 
 Before proceeding, ensure you have the following installed on your host system:
 
@@ -15,7 +15,7 @@ Before proceeding, ensure you have the following installed on your host system:
 
 ---
 
-## 🐍 1. Backend Setup & Start (Flask)
+##  1. Backend Setup & Start (Flask)
 
 ### **Step A: Set up Environment dependencies**
 Start your WSL terminal to install required system modules and wrappers:
@@ -43,7 +43,7 @@ The Flask handler will launch supporting queries on **`http://localhost:5000`**.
 
 ---
 
-## 🎨 2. Frontend Setup & Start (Vite + React)
+##  2. Frontend Setup & Start (Vite + React)
 
 Open a **separate terminal window** to host serving packages for client rendering.
 
@@ -64,7 +64,7 @@ Vite includes an automated rule forwarding any request starting with `/api` towa
 
 ---
 
-## 🚀 3. Testing Server Integrity 
+##  3. Testing Server Integrity 
 
 To run a smoke mock payload verification to ensure frames are successfully writing with correct permissions without triggering front end client streams:
 
@@ -74,7 +74,7 @@ bash tools/test_backend.sh
 
 ---
 
-## 🚨 Troubleshooting Guidelines
+##  Troubleshooting Guidelines
 
 1. **Port Bind Failures (`5000` already bound)**: Some MacOS/Wine runtimes contain default services sitting on `5000`. You might need to change Flask wrapper headers in `server.py` to `5001` or superior mappings.
 2. **Bounding Box Overlaps**: Adjust default Confidence payloads using the `--conf 0.35` multiplier on background API fetches. 

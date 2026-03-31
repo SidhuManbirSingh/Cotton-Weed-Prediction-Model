@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 
-/* ── helpers ─────────────────────────────────────────────── */
+/*  helpers  */
 const API = ''  // proxied by Vite → localhost:5000
 
 function useToasts() {
@@ -13,7 +13,7 @@ function useToasts() {
   return { toasts, add }
 }
 
-/* ── MediaCard ───────────────────────────────────────────── */
+/*  MediaCard  */
 function MediaCard({ label, isProcessed, src, type, labelUrl }) {
   const isEmpty = !src
   return (
@@ -22,12 +22,12 @@ function MediaCard({ label, isProcessed, src, type, labelUrl }) {
         <span className={`media-card-label ${isProcessed ? 'processed-label' : 'original-label'}`}>
           {label}
         </span>
-        {isProcessed && <span className="ai-badge">✦ AI</span>}
+        {isProcessed && <span className="ai-badge"> AI</span>}
       </div>
       <div className="media-card-body">
         {isEmpty ? (
           <div className="media-placeholder">
-            <span className="placeholder-icon">{type === 'video' ? '🎬' : '🖼️'}</span>
+            <span className="placeholder-icon">{type === 'video' ? '' : ''}</span>
             <span>Awaiting {type === 'video' ? 'video' : 'image'}</span>
           </div>
         ) : type === 'video' ? (
@@ -38,28 +38,28 @@ function MediaCard({ label, isProcessed, src, type, labelUrl }) {
       </div>
       {isProcessed && labelUrl && (
         <div style={{ padding: '0.75rem', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
-          <a href={labelUrl} download className="label-download-link">📄 Download Labels (.txt)</a>
+          <a href={labelUrl} download className="label-download-link"> Download Labels (.txt)</a>
         </div>
       )}
     </div>
   )
 }
 
-/* ── DownloadModal ────────────────────────────────────────── */
+/*  DownloadModal  */
 function DownloadModal({ isOpen, onClose, result }) {
   if (!isOpen) return null
 
   const items = [
-    { url: result?.output_video_url, icon: '📥', label: 'Download Video', sub: '.mp4 (H.264 Optimized)' },
-    { url: result?.snapshot_url, icon: '🖼️', label: 'Save Snapshot', sub: '.jpg (First Frame)' },
-    { url: result?.labels_url, icon: '📋', label: 'Download YOLO Dataset', sub: '.zip (Full Folder)' },
+    { url: result?.output_video_url, icon: '', label: 'Download Video', sub: '.mp4 (H.264 Optimized)' },
+    { url: result?.snapshot_url, icon: '', label: 'Save Snapshot', sub: '.jpg (First Frame)' },
+    { url: result?.labels_url, icon: '', label: 'Download YOLO Dataset', sub: '.zip (Full Folder)' },
   ]
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <div className="modal-title">🎉 Processing Complete!</div>
+          <div className="modal-title"> Processing Complete!</div>
           <button className="modal-close" onClick={onClose}>&times;</button>
         </div>
         <div className="modal-body">
@@ -86,7 +86,7 @@ function DownloadModal({ isOpen, onClose, result }) {
   )
 }
 
-/* ── PipelineProgress ────────────────────────────────────── */
+/*  PipelineProgress  */
 function PipelineProgress({ status, message, progress, result, onOpenModal }) {
   if (!status) return null
 
@@ -95,11 +95,11 @@ function PipelineProgress({ status, message, progress, result, onOpenModal }) {
       <div className="pipeline-progress success">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <div className="pipeline-step" style={{ color: 'var(--success)', marginBottom: '0.2rem' }}>✅ Pipeline Complete</div>
+            <div className="pipeline-step" style={{ color: 'var(--success)', marginBottom: '0.2rem' }}> Pipeline Complete</div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Files are ready for download.</div>
           </div>
           <button className="btn-success" onClick={onOpenModal} style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', fontWeight: 'bold' }}>
-            📥 DOWNLOAD RESULTS
+             DOWNLOAD RESULTS
           </button>
         </div>
       </div>
@@ -107,12 +107,12 @@ function PipelineProgress({ status, message, progress, result, onOpenModal }) {
   }
 
   const stepLabels = {
-    extracting: '📦 Extracting Frames',
-    annotating: '🔬 AI Inference (GPU Enabled)',
-    converting: '🎬 Building H.264 Video',
+    extracting: ' Extracting Frames',
+    annotating: ' AI Inference (GPU Enabled)',
+    converting: ' Building H.264 Video',
   }
 
-  const stepLabel = stepLabels[progress?.step] || '⏳ Processing…'
+  const stepLabel = stepLabels[progress?.step] || ' Processing…'
   const percent = progress?.percent || 0
   const current = progress?.current || 0
   const total = progress?.total || 0
@@ -130,7 +130,7 @@ function PipelineProgress({ status, message, progress, result, onOpenModal }) {
   )
 }
 
-/* ── Main App ────────────────────────────────────────────── */
+/*  Main App  */
 export default function App() {
   const { toasts, add: toast } = useToasts()
 
@@ -167,7 +167,7 @@ export default function App() {
       const data = await res.json()
       setAiImage(`${API}${data.annotated_url}`)
       setAiImageLabel(`${API}${data.label_url}`)
-      toast('Inference complete! 🎉', 'success')
+      toast('Inference complete! ', 'success')
     } catch (e) {
       toast('Inference failed', 'error')
     } finally {
@@ -232,7 +232,7 @@ export default function App() {
           setAiVideo(`${API}${data.result.output_video_url}`)
           setJobResult(data.result)
           setShowModal(true) // OPEN MODAL AUTOMATICALLY
-          toast('Complete! 🎉', 'success')
+          toast('Complete! ', 'success')
         }
         if (data.status === 'error') { clearInterval(pollRef.current); toast(`Error: ${data.message}`, 'error') }
       } catch (_) { }
@@ -243,7 +243,7 @@ export default function App() {
   return (
     <div className="app-wrapper">
       <header className="header">
-        <div className="header-logo"><div className="logo-icon">🌿</div> Inference of ML for Cotton-Weed Prediction</div>
+        <div className="header-logo"><div className="logo-icon"></div> Inference of ML for Cotton-Weed Prediction</div>
         <div className="header-badge">HARDWARE ACCEL (GPU)</div>
       </header>
 
@@ -268,12 +268,12 @@ export default function App() {
             onDragOver={e => { e.preventDefault(); setDragging(true) }}
             onDragLeave={() => setDragging(false)} onDrop={e => { e.preventDefault(); setDragging(false); handleFile(e.dataTransfer.files[0]) }}>
             <input id="file-input" type="file" onChange={e => handleFile(e.target.files[0])} />
-            <div className="upload-icon">📁</div>
+            <div className="upload-icon"></div>
             <p className="upload-title">{dragging ? 'Drop it!' : 'Drag and drop media or click here'}</p>
           </div>
 
           {uploading && <div className="progress-bar-wrap"><div className="progress-bar-fill" style={{ width: `${progress}%` }} /></div>}
-          {imageProcessing && <div className="pipeline-progress"><div className="pipeline-step">🔬 AI Inference (GPU) in progress…</div></div>}
+          {imageProcessing && <div className="pipeline-progress"><div className="pipeline-step"> AI Inference (GPU) in progress…</div></div>}
           <PipelineProgress status={jobStatus} message={jobMsg} progress={jobProgress} result={jobResult} onOpenModal={() => setShowModal(true)} />
         </section>
 
