@@ -1,0 +1,21 @@
+# Git
+.git
+.gitignore
+
+# Python
+**/__pycache__
+**/*.pyc
+.venv
+venv
+
+# Node
+frontend/node_modules
+frontend/dist
+
+# App Data (to prevent copying massive amounts of generated media during build)
+backend/data/*
+!backend/data/.gitkeep
+
+# IDEs
+.idea
+.vscode

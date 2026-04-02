@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "5001:5000"
+    volumes:
+      # Mount the data folder to persist uploaded/processed files locally
+      - ./backend/data:/app/backend/data
+      # Optional: Mount the source code for auto-reloading during development
+      - ./backend:/app/backend
+    environment:
+      - FLASK_ENV=development
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount the source code for hot module replacement (HMR)
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.js:/app/vite.config.js
+      # Prevent the host's node_modules from overwriting the container's
+      - /app/node_modules
+    environment:
+      # Tell Vite dev server where the backend is located inside the Docker network
+      - BACKEND_URL=http://backend:5000
+    depends_on:
+      - backend
