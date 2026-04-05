@@ -1,78 +1,62 @@
-# Inference of ML for Cotton-Weed Prediction
+# Cotton Weed Detection System 🌱
 
-A clean, scalable AI-powered web and operational pipeline that processes video/image uploads to perform weed detection using **YOLOv8**, displaying a side-by-side comparison of original and AI-processed media.
+## Project Overview
+This project is an AI-powered web application that automatically detects weeds within cotton fields using drone or tractor footage. By accurately identifying weeds among crops, it empowers farmers to automate targeted herbicide spraying—significantly reducing manual labor costs, lowering chemical usage, and promoting healthier, more efficient agriculture.
 
-Powered by a modern tech stack encompassing **React/Vite** on the frontend, **Flask/OpenVINO** on the backend, and **PyTorch** for model training optimization.
+## Why This Project Matters
+Weed management is one of the most time-consuming and expensive challenges in modern agriculture. Traditional broadcast spraying wastes expensive chemicals and harms the environment. This system bridges the gap between raw field video and actionable intelligence. By processing footage to highlight exactly where weeds are located, it serves as the foundational software for smart-tractor automation, providing real-world value for sustainable farming.
 
----
+## How It Works
+The pipeline handles raw media files from start to finish seamlessly:
+1. **Upload:** Users upload drone footage or field images via the React web interface.
+2. **Frame Extraction:** The Flask backend splits continuous video into individual image frames.
+3. **Model Inference:** A fine-tuned YOLOv8 model scans each frame to detect cotton plants and weeds simultaneously.
+4. **Annotation:** Bounding boxes and confidence scores are drawn directly around detected targets.
+5. **Video Reconstruction:** The annotated frames are instantly reassembled into a smooth output video.
+6. **UI Display:** The frontend plays the original and processed media side-by-side for clear visual verification.
+
+## Visual Results
+> **Note to you:** Add your screenshots and GIFs below before submitting!
+- **[Placeholder: Before & After Image]**
+- **[Placeholder: Demo GIF showing side-by-side video play]**
+
+## Features
+- **Video & Image Processing:** Handles both static field photos and continuous drone video footage.
+- **Real-time Style Pipeline:** Optimized file handling minimizes delay between upload and detection.
+- **Side-by-Side Comparison UI:** Allows users to easily verify the model's accuracy against original footage.
+- **Batch Processing Support:** Decoupled background threads process hundreds of frames without crashing or timing out.
+- **Dockerized Deployment:** The entire system is containerized, meaning it runs consistently anywhere with a single command.
+- **Optimized Inference:** Uses Intel OpenVINO to ensure the YOLO model runs incredibly fast, even without high-end cloud GPUs.
+
+## Model Performance
+The YOLOv8 model was fine-tuned on a custom dataset of annotated UAV imagery. It achieves strong separation between crop and weed classes.
+* **mAP@50 (Weed):** 76.0%
+* **Precision (Weed):** 74.9%
+* **Recall (Weed):** 66.6%
+* **mAP@50 (Cotton):** 93.8%
+
+## Tech Stack
+- **Frontend:** React, Vite, JavaScript, HTML, CSS
+- **Backend:** Python, Flask, OpenCV
+- **Machine Learning:** YOLOv8 (Ultralytics), PyTorch, Intel OpenVINO
+- **Deployment:** Docker, Docker Compose, Bash Scripting
 
 ## Directory Structure
-
 ```text
 Cotton-Weed-Prediction-Model/
- ├── backend/                 # Python Flask API & Pipelines
- │    ├── data/               # Generated Assets & Uploads (Git-ignored)
- │    │   ├── annotated/      # Output directory for inference-run frames
- │    │   ├── frames/         # Extracted raw frames from uploaded videos
- │    │   ├── output/         # Final processed MP4 files
- │    │   └── uploads/        # Raw uploaded images/videos
- │    ├── scripts/            # Core processing modular routines
- │    │   ├── annotation.py   # Runs YOLOv8 inference on image directories
- │    │   ├── convert.py      # Assembles annotated frames into MP4s
- │    │   └── video2image.py  # Decodes videos into frame-by-frame JPGs
- │    ├── utils/              # Shared pipeline utilities
- │    │   ├── file_naming.py  # Timestamp generators for folder & file parity
- │    │   └── path_manager.py # Central location handling absolute paths 
- │    └── server/             # REST API Layer
- │        └── server.py       # Main Flask app with background jobs
- │
- ├── frontend/                # Vite + React Front-end Interface
- │    ├── src/
- │    │   ├── App.jsx         # Main dashboard component logic
- │    │   ├── index.css       # Dark mode design tokens & styling
- │    │   └── main.jsx        # React DOM entry point
- │    ├── package.json        # JS Dependencies 
- │    └── vite.config.js      # Build config & API proxies
- │
- ├── training-the-model/      # Core AI Data Science & Training Notebooks
- │    ├── Weed_Detection_Model.ipynb # YOLOv8 fine-tuning pipeline
- │    └── data.yaml           # YOLO data configuration mapping
- │
- ├── utils/                   # ML Dataset Operations & Data Science Tooling
- │    ├── dataset_stats.py           # Counts & tabularizes YOLO class distributions
- │    ├── dataset_visualizer.py      # Visually verifies YOLO boundary boxes
- │    └── dataset_annotation_dump.py # CLI output for annotation text validation
- │
- ├── tools/                   # Developer utilities & test scripts
- │    ├── check_deps.sh       # Verify WSL environment & Python dependencies
- │    ├── check_model.sh      # Validate OpenVINO model integrity
- │    ├── run_batch_inference.py # Template for local bulk image processing
- │    ├── test_backend.sh     # CLI tool to smoke-test API endpoints
- │    ├── test_image_inference.sh # Validates the single-image AI pipeline
- │    └── video_to_img.py     # Standalone frame extraction utility
- │
- ├── samples/                 # Large media assets for development
- │    ├── project_video.mp4       # Main test footage (high-bitrate)
- │    └── project-video-short.mp4 # Short-form testing clip
- │
- ├── requirements.txt         # Global Python dependencies (Flask, Ultralytics, PyTorch)
- ├── docker-compose.yml       # Production orchestration logic
- ├── deployment-script.sh     # Seamless environment startup script
- ├── start_backend.sh         # Launch wrapper for Flask server runs
- └── model.pt                 # Optimized weights for live YOLO detections
+ ├── backend/                 # Flask API, image processing, and inference logic
+ ├── frontend/                # React user interface and design systems
+ ├── training-the-model/      # Jupyter notebooks and data for training YOLOv8
+ ├── utils/                   # Data science scripts for verifying dataset annotations
+ ├── tools/                   # Developer scripts for testing and environment setup
+ ├── samples/                 # Test images and video assets
+ ├── docker-compose.yml       # Production deployment configuration
+ ├── requirements.txt         # Global Python dependencies
+ └── model.pt                 # The trained AI model weights
 ```
-
-## Key System Pillars
-
-1. **Safety & Speed Control**: Path Management utilities use purely isolated node streams making batch rewrites scalable to multiple processors without mutating baseline assets.
-2. **Side-by-Side Visualization UI**: Dynamic overlays allowing visual inspection on whether prediction is properly thresholded inside image bounding wrappers.
-3. **Queue Processing Handler**: Decoupled thread pooling executes frame decomposition so larger videos do not timeout client requests.
-4. **End-to-End ML Integration**: Complete visibility from raw data bounding mapping (`Weed_Detection_Model.ipynb`), to dataset verification (`utils/`), directly into hardware-accelerated predictions (OpenVINO).
-
----
 
 ## Recommended Reading
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** — Core environment setup instructions.
-- **`deployment_onboarding_guide.md`** — For a beginner-friendly overview of the entire underlying technology stack.
-- **`technology_deep_dive.md`** — For detailed explanations on how React, Flask, Docker, and YOLO work fundamentally under the hood.
-- **`package_requirements_doc.md`** — For an explicit breakdown of all external node/python packages utilized.
+- **`deployment_onboarding_guide.md`** — A beginner-friendly overview of the entire technology stack.
+- **`technology_deep_dive.md`** — Detailed explanations on how React, Flask, Docker, and YOLO work under the hood.
+- **`package_requirements_doc.md`** — A breakdown of all external packages utilized.
