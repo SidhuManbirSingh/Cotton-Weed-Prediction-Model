@@ -4,7 +4,7 @@
 
 ---
 
-## 🚀 Quick Demo
+## Quick Demo
 
 ![Demo GIF](./assets/demo.gif)
 
@@ -12,7 +12,7 @@
 
 ---
 
-## 📌 Project Overview
+## Project Overview
 
 This project is an AI-powered web application that detects weeds in cotton fields using drone or tractor footage. It processes images and videos to identify weeds among crops and highlights them visually.
 
@@ -24,7 +24,7 @@ By automating weed detection, the system helps:
 
 ---
 
-## 🌍 Why This Project Matters
+## Why This Project Matters
 
 Weed control is one of the most expensive and time-consuming challenges in agriculture. Traditional spraying methods waste chemicals and harm the environment.
 
@@ -36,7 +36,7 @@ This system provides a smarter approach:
 
 ---
 
-## ⚙️ How It Works
+## How It Works
 
 **Pipeline Overview:**
 Upload → Extract Frames → Detect Weeds → Annotate → Rebuild Video → Display Results
@@ -50,9 +50,7 @@ Upload → Extract Frames → Detect Weeds → Annotate → Rebuild Video → Di
 
 ---
 
-## 🖼️ Visual Results
-
-> Replace placeholders with real outputs before publishing
+## Visual Results
 
 * **Before vs After Detection**
 
@@ -64,7 +62,7 @@ Upload → Extract Frames → Detect Weeds → Annotate → Rebuild Video → Di
 
 ---
 
-## ✨ Features
+## Features
 
 * Supports both image and video inputs
 * Fast processing pipeline with minimal delay
