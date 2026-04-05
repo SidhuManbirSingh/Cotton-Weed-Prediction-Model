@@ -1,62 +1,135 @@
-# Cotton Weed Detection System 🌱
+# 🌱 Cotton Weed Detection System
 
-## Project Overview
-This project is an AI-powered web application that automatically detects weeds within cotton fields using drone or tractor footage. By accurately identifying weeds among crops, it empowers farmers to automate targeted herbicide spraying—significantly reducing manual labor costs, lowering chemical usage, and promoting healthier, more efficient agriculture.
+**AI system that detects weeds in cotton fields from drone footage — enabling targeted spraying and reducing chemical waste.**
 
-## Why This Project Matters
-Weed management is one of the most time-consuming and expensive challenges in modern agriculture. Traditional broadcast spraying wastes expensive chemicals and harms the environment. This system bridges the gap between raw field video and actionable intelligence. By processing footage to highlight exactly where weeds are located, it serves as the foundational software for smart-tractor automation, providing real-world value for sustainable farming.
+---
 
-## How It Works
-The pipeline handles raw media files from start to finish seamlessly:
-1. **Upload:** Users upload drone footage or field images via the React web interface.
-2. **Frame Extraction:** The Flask backend splits continuous video into individual image frames.
-3. **Model Inference:** A fine-tuned YOLOv8 model scans each frame to detect cotton plants and weeds simultaneously.
-4. **Annotation:** Bounding boxes and confidence scores are drawn directly around detected targets.
-5. **Video Reconstruction:** The annotated frames are instantly reassembled into a smooth output video.
-6. **UI Display:** The frontend plays the original and processed media side-by-side for clear visual verification.
+## 🚀 Quick Demo
 
-## Visual Results
-> **Note to you:** Add your screenshots and GIFs below before submitting!
-- **[Placeholder: Before & After Image]**
-- **[Placeholder: Demo GIF showing side-by-side video play]**
+![Demo GIF](./assets/demo.gif)
 
-## Features
-- **Video & Image Processing:** Handles both static field photos and continuous drone video footage.
-- **Real-time Style Pipeline:** Optimized file handling minimizes delay between upload and detection.
-- **Side-by-Side Comparison UI:** Allows users to easily verify the model's accuracy against original footage.
-- **Batch Processing Support:** Decoupled background threads process hundreds of frames without crashing or timing out.
-- **Dockerized Deployment:** The entire system is containerized, meaning it runs consistently anywhere with a single command.
-- **Optimized Inference:** Uses Intel OpenVINO to ensure the YOLO model runs incredibly fast, even without high-end cloud GPUs.
+> Upload a field video → Detect weeds → View results instantly
 
-## Model Performance
-The YOLOv8 model was fine-tuned on a custom dataset of annotated UAV imagery. It achieves strong separation between crop and weed classes.
+---
+
+## 📌 Project Overview
+
+This project is an AI-powered web application that detects weeds in cotton fields using drone or tractor footage. It processes images and videos to identify weeds among crops and highlights them visually.
+
+By automating weed detection, the system helps:
+
+* Reduce manual labor
+* Lower herbicide usage
+* Improve farming efficiency
+
+---
+
+## 🌍 Why This Project Matters
+
+Weed control is one of the most expensive and time-consuming challenges in agriculture. Traditional spraying methods waste chemicals and harm the environment.
+
+This system provides a smarter approach:
+
+* Detect weeds precisely
+* Enable targeted spraying
+* Support future automation (e.g., smart tractors)
+
+---
+
+## ⚙️ How It Works
+
+**Pipeline Overview:**
+Upload → Extract Frames → Detect Weeds → Annotate → Rebuild Video → Display Results
+
+1. **Upload:** Users upload images or videos through the web interface
+2. **Frame Extraction:** Videos are split into individual frames
+3. **Model Inference:** YOLOv8 detects cotton plants and weeds
+4. **Annotation:** Bounding boxes and confidence scores are added
+5. **Video Reconstruction:** Frames are combined into an output video
+6. **UI Display:** Results are shown side-by-side with the original media
+
+---
+
+## 🖼️ Visual Results
+
+> Replace placeholders with real outputs before publishing
+
+* **Before vs After Detection**
+
+  * ![Before/After](./assets/before_after.png)
+
+* **Live Demo**
+
+  * ![Demo](./assets/demo.gif)
+
+---
+
+## ✨ Features
+
+* Supports both image and video inputs
+* Fast processing pipeline with minimal delay
+* Side-by-side comparison for easy validation
+* Handles large videos using background processing
+* Fully containerized with Docker
+* Optimized inference using OpenVINO
+
+---
+
+## 📊 Model Performance
+
+The model performs well at distinguishing cotton plants from weeds. Crop detection is more accurate due to more consistent visual patterns, while weed detection is slightly more challenging.
+
 * **mAP@50 (Weed):** 76.0%
 * **Precision (Weed):** 74.9%
 * **Recall (Weed):** 66.6%
 * **mAP@50 (Cotton):** 93.8%
 
-## Tech Stack
-- **Frontend:** React, Vite, JavaScript, HTML, CSS
-- **Backend:** Python, Flask, OpenCV
-- **Machine Learning:** YOLOv8 (Ultralytics), PyTorch, Intel OpenVINO
-- **Deployment:** Docker, Docker Compose, Bash Scripting
+---
 
-## Directory Structure
+## 🧱 Tech Stack
+
+* **Frontend:** React, Vite, JavaScript, HTML, CSS
+* **Backend:** Python, Flask, OpenCV
+* **Machine Learning:** YOLOv8 (Ultralytics), PyTorch, OpenVINO
+* **Deployment:** Docker, Docker Compose, Bash
+
+---
+
+## 📁 Project Structure
+
 ```text
 Cotton-Weed-Prediction-Model/
- ├── backend/                 # Flask API, image processing, and inference logic
- ├── frontend/                # React user interface and design systems
- ├── training-the-model/      # Jupyter notebooks and data for training YOLOv8
- ├── utils/                   # Data science scripts for verifying dataset annotations
- ├── tools/                   # Developer scripts for testing and environment setup
- ├── samples/                 # Test images and video assets
- ├── docker-compose.yml       # Production deployment configuration
- ├── requirements.txt         # Global Python dependencies
- └── model.pt                 # The trained AI model weights
+ ├── backend/                 # Flask API and inference pipeline
+ ├── frontend/                # React user interface
+ ├── training-the-model/      # Model training notebooks and configs
+ ├── utils/                   # Dataset validation and analysis tools
+ ├── tools/                   # Testing and developer scripts
+ ├── samples/                 # Example images and videos
+ ├── docker-compose.yml       # Deployment configuration
+ ├── requirements.txt         # Python dependencies
+ └── model.pt                 # Trained model weights
 ```
 
-## Recommended Reading
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** — Core environment setup instructions.
-- **`deployment_onboarding_guide.md`** — A beginner-friendly overview of the entire technology stack.
-- **`technology_deep_dive.md`** — Detailed explanations on how React, Flask, Docker, and YOLO work under the hood.
-- **`package_requirements_doc.md`** — A breakdown of all external packages utilized.
+---
+
+## 🔮 Future Improvements
+
+* Improve weed detection recall with larger datasets
+* Deploy on edge devices for real-time field usage
+* Add live camera streaming support
+* Integrate GPS-based precision spraying
+
+---
+
+## 📚 Documentation
+
+* **[DEPLOYMENT.md](./DEPLOYMENT.md)** — Setup and deployment instructions
+* **deployment_onboarding_guide.md** — Beginner-friendly overview
+* **technology_deep_dive.md** — Detailed system explanation
+* **package_requirements_doc.md** — Dependency breakdown
+
+---
+
+## 🧠 Final Note
+
+This project demonstrates a full end-to-end AI system — from data processing and model training to deployment and user interface — focused on solving a real-world agricultural problem.
