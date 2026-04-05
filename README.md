@@ -6,7 +6,7 @@ Powered by a modern tech stack encompassing **React/Vite** on the frontend, **Fl
 
 ---
 
-## 📁 Directory Structure
+## Directory Structure
 
 ```text
 Cotton-Weed-Prediction-Model/
@@ -62,16 +62,16 @@ Cotton-Weed-Prediction-Model/
  └── model.pt                 # Optimized weights for live YOLO detections
 ```
 
-## ⚡ Key System Pillars
+## Key System Pillars
 
 1. **Safety & Speed Control**: Path Management utilities use purely isolated node streams making batch rewrites scalable to multiple processors without mutating baseline assets.
 2. **Side-by-Side Visualization UI**: Dynamic overlays allowing visual inspection on whether prediction is properly thresholded inside image bounding wrappers.
 3. **Queue Processing Handler**: Decoupled thread pooling executes frame decomposition so larger videos do not timeout client requests.
-4. **End-to-End AI Integration**: Complete visibility from raw data bounding mapping (`Weed_Detection_Model.ipynb`), to dataset verification (`utils/`), directly into hardware-accelerated predictions (OpenVINO).
+4. **End-to-End ML Integration**: Complete visibility from raw data bounding mapping (`Weed_Detection_Model.ipynb`), to dataset verification (`utils/`), directly into hardware-accelerated predictions (OpenVINO).
 
 ---
 
-## 📖 Recommended Reading
+## Recommended Reading
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** — Core environment setup instructions.
 - **`deployment_onboarding_guide.md`** — For a beginner-friendly overview of the entire underlying technology stack.
 - **`technology_deep_dive.md`** — For detailed explanations on how React, Flask, Docker, and YOLO work fundamentally under the hood.
