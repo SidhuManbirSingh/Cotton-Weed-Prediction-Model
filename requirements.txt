@@ -1,0 +1,35 @@
+# Python Global requirements for the complete Cotton Weed Prediction Project
+# This merges both production (Flask web-server) and ML Data Science pipelines.
+
+# --------------------------
+# AI Engine & Inference
+# --------------------------
+ultralytics>=8.0
+torch
+torchvision
+
+# --------------------------
+# Backend Web Server (Flask API)
+# --------------------------
+flask>=3.0
+flask-cors>=4.0
+werkzeug>=3.0
+
+# --------------------------
+# Computer Vision & Data Handling
+# --------------------------
+opencv-python>=4.9
+numpy
+
+# --------------------------
+# Data Science & Monitoring (Jupyter/Training)
+# --------------------------
+pandas
+matplotlib
+supervision
+
+# --------------------------
+# Deployment & Performance
+# --------------------------
+openvino 
+openvino-dev 
