@@ -1,0 +1,8 @@
+names:
+- weed
+- cotton
+nc: 2
+train: /content/drive/MyDrive/Colab Notebooks/Data_New_Weed/Annotated UAV Image Dataset
+  for Object Detection U/dataset_split/train/images
+val: /content/drive/MyDrive/Colab Notebooks/Data_New_Weed/Annotated UAV Image Dataset
+  for Object Detection U/dataset_split/test/images
