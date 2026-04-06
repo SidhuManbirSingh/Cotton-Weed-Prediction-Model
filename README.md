@@ -6,9 +6,13 @@
 
 ## Quick Demo
 
+[![Watch Demo on YouTube](https://img.shields.io/badge/Watch%20Demo-YouTube-red?logo=youtube)](https://youtu.be/bO3l2jyvdKA)
+
 ![Demo GIF](./assets/demo.gif)
 
 > Upload a field video → Detect weeds → View results instantly
+
+📺 **[Full Video Walkthrough on YouTube →](https://youtu.be/bO3l2jyvdKA)**
 
 ---
 
