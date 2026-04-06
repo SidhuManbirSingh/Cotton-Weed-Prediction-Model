@@ -84,6 +84,14 @@ The model performs well at distinguishing cotton plants from weeds. Crop detecti
 
 ---
 
+## 📦 Dataset Download
+
+The custom annotated UAV image dataset used to train the YOLOv8 model is publicly available. You can access and download the raw images and YOLO annotations below:
+
+* **[Download Cotton-Weed UAV Dataset (Google Drive)](https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing)**
+
+---
+
 ## 🧱 Tech Stack
 
 * **Frontend:** React, Vite, JavaScript, HTML, CSS
