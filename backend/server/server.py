@@ -319,5 +319,32 @@ def _run_pipeline(job_id: str, video_path: str, frame_interval: int, conf: float
         raise
 
 # ---------------------------------------------------------------------------
+# Frontend static file serving
+# ---------------------------------------------------------------------------
+_PROJECT_ROOT = _BACKEND_DIR.parent
+
+@app.route("/", methods=["GET"])
+@app.route("/index.html", methods=["GET"])
+def serve_index():
+    index_file = _PROJECT_ROOT / "index.html"
+    if index_file.exists():
+        return send_file(str(index_file))
+    return jsonify({"status": "CottonVision API Active", "version": "1.0.0"})
+
+@app.route("/frontend/<path:filepath>", methods=["GET"])
+def serve_frontend_static(filepath: str):
+    file_path = (_PROJECT_ROOT / "frontend" / filepath).resolve()
+    if file_path.exists() and file_path.is_file():
+        return send_file(str(file_path))
+    abort(404)
+
+@app.route("/samples/<path:filepath>", methods=["GET"])
+def serve_samples_static(filepath: str):
+    file_path = (_PROJECT_ROOT / "samples" / filepath).resolve()
+    if file_path.exists() and file_path.is_file():
+        return send_file(str(file_path))
+    abort(404)
+
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
