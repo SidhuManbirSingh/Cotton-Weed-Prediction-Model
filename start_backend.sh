@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Starts the Flask backend server.
-# Run from WSL: bash start_backend.sh
+# Run from repository root: bash start_backend.sh
 set -e
-PROJECT="/mnt/c/Users/manbi/OneDrive/Desktop/comp-440-website-1/Cotton-Weed-Prediction-Model"
-cd "$PROJECT"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 
 echo "=== Starting Flask backend on port 5000 ==="
-export PYTHONPATH="$PROJECT"
+export PYTHONPATH="$SCRIPT_DIR"
 python3 -m backend.server.server
