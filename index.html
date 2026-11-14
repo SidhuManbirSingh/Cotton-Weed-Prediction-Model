@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate icon" type="image/x-icon" href="/favicon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CottonVision — UAV Cotton-Weed Detection &amp; Precision Spraying AI</title>
   <meta name="description" content="CottonVision — AI-powered UAV cotton and weed detection system. Upload drone field imagery or 4K flight video, run OpenVINO YOLOv8 inference, and export browser-native H.264 streams and normalized YOLO datasets." />
@@ -30,11 +32,12 @@
           <nav class="site-nav" aria-label="Main Navigation">
             <a href="#workbench" class="site-nav-link">Workbench</a>
             <a href="#features" class="site-nav-link">Pipeline</a>
-            <a href="#benchmarks" class="site-nav-link">Benchmarks</a>
-            <a href="#pricing" class="site-nav-link">Pricing</a>
+            <a href="#workflow" class="site-nav-link">Workflow</a>
+            <a href="#research" class="site-nav-link">Research</a>
           </nav>
           <div class="site-header-actions">
-            <a href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing" target="_blank" rel="noreferrer" class="site-nav-link">Dataset</a>
+            <a href="/Final_Report.pdf" target="_blank" rel="noreferrer" class="site-nav-link">Final Report</a>
+            <a href="https://github.com/SidhuManbirSingh/Cotton-Weed-Prediction-Model/" target="_blank" rel="noreferrer" class="site-nav-link">GitHub</a>
             <a href="#workbench" class="btn-pill btn-primary btn-sm">Open Workbench</a>
           </div>
           <button class="mobile-menu-toggle" id="mobileToggle" aria-label="Toggle navigation menu">
@@ -45,12 +48,13 @@
           <div class="mobile-nav-links">
             <a href="#workbench" class="site-nav-link">Workbench</a>
             <a href="#features" class="site-nav-link">Pipeline</a>
-            <a href="#benchmarks" class="site-nav-link">Benchmarks</a>
-            <a href="#pricing" class="site-nav-link">Pricing</a>
+            <a href="#workflow" class="site-nav-link">Workflow</a>
+            <a href="#research" class="site-nav-link">Research</a>
             <a href="#faq" class="site-nav-link">FAQ</a>
           </div>
           <div class="mobile-nav-actions">
-            <a href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing" target="_blank" rel="noreferrer" class="btn-pill btn-secondary btn-sm">Download Dataset</a>
+            <a href="/Final_Report.pdf" target="_blank" rel="noreferrer" class="btn-pill btn-secondary btn-sm">Final Report (PDF)</a>
+            <a href="https://github.com/SidhuManbirSingh/Cotton-Weed-Prediction-Model/" target="_blank" rel="noreferrer" class="btn-pill btn-secondary btn-sm">GitHub Repository</a>
             <a href="#workbench" class="btn-pill btn-primary btn-sm">Launch Inference Studio</a>
           </div>
         </div>
@@ -75,7 +79,7 @@
               <button type="button" class="btn-pill btn-secondary" id="inspectBtn">Inspect Sample Flight</button>
             </div>
             <div class="hero-trust-caption">
-              OpenVINO GPU accelerated · Browser-native H.264 output · Instant .zip YOLO labels
+              UFV Directed Studies Research · One-command run.bat startup · Instant .zip YOLO labels
             </div>
             <div class="hero-figures">
               <div class="hero-figure-item">
@@ -87,8 +91,8 @@
                 <div class="hero-figure-label">Weed detection mAP@50</div>
               </div>
               <div class="hero-figure-item">
-                <div class="hero-figure-value tabular-nums">5×</div>
-                <div class="hero-figure-label">Faster video throughput</div>
+                <div class="hero-figure-value tabular-nums">147 FPS</div>
+                <div class="hero-figure-label">Real-time GPU throughput · 6.8 ms latency</div>
               </div>
             </div>
           </div>
@@ -337,161 +341,217 @@
       </div>
     </section>
 
-    <!-- 5. PROCESS -->
-    <section id="benchmarks" class="band process-band">
+    <!-- 5. DEPLOYMENT & INFERENCE WORKFLOW -->
+    <section id="workflow" class="band workflow-band">
       <div class="container">
         <div class="section-header">
-          <span class="section-kicker">Deployment Workflow</span>
-          <h2 class="section-title">From Drone SD Card to Prescription Spraying</h2>
-          <p class="section-subtitle">Three deterministic steps turn raw multispectral or RGB aerial footage into actionable precision agriculture datasets.</p>
+          <span class="section-kicker">Deployment &amp; Inference Workflow</span>
+          <h2 class="section-title">End-to-End Arrow Architecture</h2>
+          <p class="section-subtitle">Visual stage-by-stage execution flow from single-command local launch to YOLOv8n detection and normalized dataset packaging.</p>
         </div>
-        <div class="process-track">
-          <div class="process-step-card">
-            <div class="process-step-top"><span class="process-step-number">01</span><span class="process-connector-label">PHASE 1 →</span></div>
-            <div>
-              <h3 class="process-step-heading">Ingest UAV Flight Media</h3>
-              <p class="process-step-desc">Drop orthomosaic geotiffs or raw 4K MP4 drone video straight into the workbench. CottonVision validates the stream, extracts frames at your chosen interval, and reads embedded flight timestamps.</p>
+
+        <div class="workflow-stack">
+          <!-- Flow 1: Single-Command Startup -->
+          <div class="workflow-flow">
+            <div class="workflow-flow-head">
+              <div>
+                <h3 class="workflow-flow-title">Single-Command Project Startup Flow</h3>
+                <p class="workflow-flow-subtitle">Automated local launch and dependency setup with zero manual configuration.</p>
+              </div>
+              <span class="workflow-flow-tag">run.bat · deployment-script.sh</span>
             </div>
-            <div class="process-step-meta">Input: MP4 / AVI / JPG / PNG · Auto-routing</div>
+            <div class="workflow-row">
+              <div class="workflow-node accent-node">
+                <div>
+                  <div class="workflow-node-top"><span class="workflow-node-step">01</span><span class="workflow-node-role">Launch</span></div>
+                  <h4 class="workflow-node-title" style="margin-top:12px;">Execute One Script</h4>
+                  <p class="workflow-node-desc">Run run.bat on Windows or bash deployment-script.sh on Linux/macOS to initialize the environment.</p>
+                </div>
+                <div class="workflow-node-code">run.bat / deployment-script.sh</div>
+              </div>
+              <div class="workflow-arrow" aria-hidden="true">
+                <svg class="workflow-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+              </div>
+              <div class="workflow-node">
+                <div>
+                  <div class="workflow-node-top"><span class="workflow-node-step">02</span><span class="workflow-node-role">Validate</span></div>
+                  <h4 class="workflow-node-title" style="margin-top:12px;">Verify Runtime &amp; Model</h4>
+                  <p class="workflow-node-desc">Confirms Python 3.10+, installs dependencies, checks FFmpeg/OpenCV, and verifies YOLOv8n weights.</p>
+                </div>
+                <div class="workflow-node-code">YOLOv8n (yolov8n.pt)</div>
+              </div>
+              <div class="workflow-arrow" aria-hidden="true">
+                <svg class="workflow-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+              </div>
+              <div class="workflow-node">
+                <div>
+                  <div class="workflow-node-top"><span class="workflow-node-step">03</span><span class="workflow-node-role">Boot</span></div>
+                  <h4 class="workflow-node-title" style="margin-top:12px;">Start Flask &amp; Web UI</h4>
+                  <p class="workflow-node-desc">Boots the threaded Flask REST backend on port 5000 and serves the frontend workbench.</p>
+                </div>
+                <div class="workflow-node-code">localhost:5000 / 3000</div>
+              </div>
+              <div class="workflow-arrow" aria-hidden="true">
+                <svg class="workflow-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+              </div>
+              <div class="workflow-node accent-node">
+                <div>
+                  <div class="workflow-node-top"><span class="workflow-node-step">04</span><span class="workflow-node-role">Operate</span></div>
+                  <h4 class="workflow-node-title" style="margin-top:12px;">Inspect &amp; Export Live</h4>
+                  <p class="workflow-node-desc">Open http://127.0.0.1:5000 to upload UAV media, tune frame skip, and download H.264/YOLO ZIP outputs.</p>
+                </div>
+                <div class="workflow-node-code">HTTP 200 OK</div>
+              </div>
+            </div>
           </div>
-          <div class="process-step-card">
-            <div class="process-step-top"><span class="process-step-number">02</span><span class="process-connector-label">PHASE 2 →</span></div>
-            <div>
-              <h3 class="process-step-heading">Execute OpenVINO YOLOv8 Inference</h3>
-              <p class="process-step-desc">The trained neural network segments cotton plants from weed clusters at flight speed. Intel OpenVINO runtime optimizes the model across available GPU and CPU cores with minimal memory overhead.</p>
+
+          <!-- Flow 2: Inference & Dataset Export -->
+          <div class="workflow-flow">
+            <div class="workflow-flow-head">
+              <div>
+                <h3 class="workflow-flow-title">UAV Media Inference &amp; Export Flow</h3>
+                <p class="workflow-flow-subtitle">Deterministic end-to-end processing pipeline inside the Flask and YOLOv8n engine.</p>
+              </div>
+              <span class="workflow-flow-tag">POST /api/process · Thread-Locked</span>
             </div>
-            <div class="process-step-meta">Benchmark: 93.8% Cotton mAP@50 · 76.0% Weed mAP@50</div>
-          </div>
-          <div class="process-step-card">
-            <div class="process-step-top"><span class="process-step-number">03</span><span class="process-connector-label">PHASE 3</span></div>
-            <div>
-              <h3 class="process-step-heading">Validate Side-by-Side & Export Labels</h3>
-              <p class="process-step-desc">Inspect the dual-pane player for false positives, verify weed cluster densities, and instantly export reconstructed H.264 video, high-resolution snapshots, and complete YOLO dataset archives (.zip).</p>
+            <div class="workflow-row">
+              <div class="workflow-node">
+                <div>
+                  <div class="workflow-node-top"><span class="workflow-node-step">01</span><span class="workflow-node-role">Ingest</span></div>
+                  <h4 class="workflow-node-title" style="margin-top:12px;">Upload Drone Media</h4>
+                  <p class="workflow-node-desc">Validates uploaded 4K aerial frames or MP4/AVI flight videos and stages isolated session storage.</p>
+                </div>
+                <div class="workflow-node-code">POST /api/upload</div>
+              </div>
+              <div class="workflow-arrow" aria-hidden="true">
+                <svg class="workflow-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+              </div>
+              <div class="workflow-node accent-node">
+                <div>
+                  <div class="workflow-node-top"><span class="workflow-node-step">02</span><span class="workflow-node-role">Detect</span></div>
+                  <h4 class="workflow-node-title" style="margin-top:12px;">YOLOv8n Inference</h4>
+                  <p class="workflow-node-desc">Samples frames at interval N and classifies Cotton (Class 1) vs. Weed (Class 0) bounding boxes.</p>
+                </div>
+                <div class="workflow-node-code">640x640 · 6.8 ms GPU</div>
+              </div>
+              <div class="workflow-arrow" aria-hidden="true">
+                <svg class="workflow-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+              </div>
+              <div class="workflow-node">
+                <div>
+                  <div class="workflow-node-top"><span class="workflow-node-step">03</span><span class="workflow-node-role">Transcode</span></div>
+                  <h4 class="workflow-node-title" style="margin-top:12px;">Sync FPS &amp; H.264</h4>
+                  <p class="workflow-node-desc">Computes Output FPS = Source FPS / N and encodes browser-native faststart H.264 MP4 streams.</p>
+                </div>
+                <div class="workflow-node-code">ffmpeg avc1 + faststart</div>
+              </div>
+              <div class="workflow-arrow" aria-hidden="true">
+                <svg class="workflow-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+              </div>
+              <div class="workflow-node">
+                <div>
+                  <div class="workflow-node-top"><span class="workflow-node-step">04</span><span class="workflow-node-role">Deliver</span></div>
+                  <h4 class="workflow-node-title" style="margin-top:12px;">Verify &amp; Package ZIP</h4>
+                  <p class="workflow-node-desc">Streams side-by-side playback and compiles paired images/ and normalized labels/ archives.</p>
+                </div>
+                <div class="workflow-node-code">/api/download/dataset/&lt;id&gt;</div>
+              </div>
             </div>
-            <div class="process-step-meta">Output: H.264 Video · YOLOv8 .txt · Snapshot .jpg</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 6. TESTIMONIALS -->
-    <section class="band testimonials-band">
+    <!-- 6. ACADEMIC RESEARCH & METHODOLOGY -->
+    <section id="research" class="band research-band">
       <div class="container">
         <div class="section-header">
-          <span class="section-kicker">Field Proof</span>
-          <h2 class="section-title">Validated Across 45,000 Commercial Cotton Acres</h2>
-          <p class="section-subtitle">Agronomists and aerial operators rely on CottonVision to cut chemical costs and eliminate herbicide waste.</p>
+          <span class="section-kicker">Academic Research</span>
+          <h2 class="section-title">Directed Studies at University of the Fraser Valley</h2>
+          <p class="section-subtitle">
+            Computer vision research and engineering conducted by Manbir Singh Sidhu under the supervision and guidance of Professor Omer Waqar at the University of the Fraser Valley (UFV).
+          </p>
         </div>
-        <div class="testimonials-layout">
-          <div class="testimonial-lead-card">
+
+        <div class="research-layout">
+          <div class="research-banner">
             <div>
-              <blockquote class="testimonial-lead-quote">
-                “CottonVision cut our herbicide spray volume by 42% in our first season across 12,000 acres. Rather than blanket spraying entire sectors, our boom sprayers now target verified weed clusters identified from morning drone flights.”
-              </blockquote>
-              <div class="testimonial-author-row">
-                <div class="testimonial-avatar">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#201f20" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                </div>
-                <div>
-                  <div class="testimonial-author-name">Dr. Marcus Vance</div>
-                  <div class="testimonial-author-role">Chief Agronomist, Delta Ag Research Group</div>
-                </div>
+              <h3 class="research-lead-title">Full Research Paper &amp; Open-Source Codebase</h3>
+              <p class="research-lead-copy">
+                Everything in this system was performed under the instructions and guidance of Professor Omer Waqar at the University of the Fraser Valley. Read the complete 76-page Directed Studies Final Report for full experimental proofs, launch everything immediately via <code>run.bat</code>, or inspect the source repository on GitHub.
+              </p>
+              <div class="research-actions-row">
+                <a href="/Final_Report.pdf" target="_blank" rel="noreferrer" class="btn-pill btn-primary btn-sm">Read Final Report (PDF)</a>
+                <a href="https://github.com/SidhuManbirSingh/Cotton-Weed-Prediction-Model/" target="_blank" rel="noreferrer" class="btn-pill btn-secondary btn-sm">View GitHub Repository</a>
+                <a href="https://doi.org/10.17632/fwg6pt6ckd.1" target="_blank" rel="noreferrer" class="btn-pill btn-secondary btn-sm">Mendeley Dataset [15]</a>
               </div>
             </div>
-            <div class="testimonial-lead-stat-panel">
-              <div class="testimonial-stat-big tabular-nums">42%</div>
-              <div class="testimonial-stat-caption">Chemical herbicide savings achieved across 12,000 commercial Mississippi Delta acres.</div>
-            </div>
-          </div>
-          <div class="testimonials-supporting-grid">
-            <div class="testimonial-support-card">
-              <p class="testimonial-support-quote">“The temporal frame synchronization solved our video playback issues completely. We get high-confidence weed detection in 4K drone flights without losing flight time accuracy or crashing field laptops.”</p>
-              <div class="testimonial-author-row">
-                <div class="testimonial-avatar">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#201f20" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                </div>
-                <div>
-                  <div class="testimonial-author-name">Elena Rostova</div>
-                  <div class="testimonial-author-role">UAV Operations Lead, Aerial Precision Labs</div>
-                </div>
-              </div>
-            </div>
-            <div class="testimonial-support-card">
-              <p class="testimonial-support-quote">“Exporting ready-to-train YOLO datasets straight from our field flights allowed us to adapt the model to late-season cocklebur in under three days. It is the most practical CV tool we have deployed.”</p>
-              <div class="testimonial-author-row">
-                <div class="testimonial-avatar">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#201f20" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                </div>
-                <div>
-                  <div class="testimonial-author-name">Carlos Mendez</div>
-                  <div class="testimonial-author-role">Autonomous Systems Engineer, Sunbelt Spraying</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- 7. PRICING -->
-    <section id="pricing" class="band pricing-band">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-kicker">Transparent Plans</span>
-          <h2 class="section-title">Scalable Inference for Research and Fleet Ops</h2>
-          <p class="section-subtitle">Run locally with complete open-source transparency or deploy managed GPU pipelines across commercial flight operations.</p>
-        </div>
-        <div class="pricing-grid">
-          <div class="pricing-card">
-            <div class="pricing-card-top">
-              <div class="pricing-title-row"><div class="pricing-plan-name">Field Researcher</div></div>
-              <div class="pricing-price-row"><span class="pricing-amount tabular-nums">$0</span><span class="pricing-period">/ open source</span></div>
-              <p class="pricing-summary">Full local inference engine for independent growers and university research labs.</p>
-              <ul class="pricing-feature-list">
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>Local OpenVINO inference (CPU/GPU)</span></li>
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>Unlimited static orthomosaic processing</span></li>
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>Up to 5-minute flight video batches</span></li>
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>Standard YOLOv8 annotation export</span></li>
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>Self-hosted Docker container</span></li>
-              </ul>
+            <div class="research-attribution-panel">
+              <div class="research-meta-row">
+                <span class="research-meta-label">Institution</span>
+                <span class="research-meta-value">University of the Fraser Valley (UFV)</span>
+              </div>
+              <div class="research-meta-row">
+                <span class="research-meta-label">Supervisor</span>
+                <span class="research-meta-value">Professor Omer Waqar</span>
+              </div>
+              <div class="research-meta-row">
+                <span class="research-meta-label">Author &amp; Researcher</span>
+                <span class="research-meta-value">Manbir Singh Sidhu</span>
+              </div>
+              <div class="research-meta-row">
+                <span class="research-meta-label">Quick Launch Scripts</span>
+                <span class="research-meta-value">run.bat (Windows) · deployment-script.sh</span>
+              </div>
             </div>
-            <a href="#workbench" class="btn-pill btn-secondary">Deploy Local Engine</a>
           </div>
 
-          <div class="pricing-card recommended">
-            <div class="pricing-card-top">
-              <div class="pricing-title-row">
-                <div class="pricing-plan-name">Commercial Agronomy</div>
-                <span class="pricing-recommended-pill">Recommended</span>
+          <div class="research-grid">
+            <div class="research-card">
+              <div>
+                <div class="research-card-kicker">Dataset [15, 20, 21]</div>
+                <h3 class="research-card-title">Texas Panhandle UAV Corpus</h3>
+                <p class="research-card-desc">
+                  Built on the peer-reviewed Mendeley UAV Cotton-Weed dataset captured using an Autel Robotics EVO II Dual 640T V3 drone at 4096 x 3072 resolution.
+                </p>
               </div>
-              <div class="pricing-price-row"><span class="pricing-amount tabular-nums">$180</span><span class="pricing-period">/ operator / mo</span></div>
-              <p class="pricing-summary">High-speed processing pipeline for agricultural drone consultants and spraying contractors.</p>
-              <ul class="pricing-feature-list">
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>All Field Researcher capabilities</span></li>
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>Unlimited 4K drone video flight queueing</span></li>
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>Adjustable 1x to 15x frame skip sync</span></li>
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>Automated H.264 browser streaming</span></li>
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>Instant ZIP dataset packaging</span></li>
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>Variable-rate boom sprayer map export</span></li>
+              <ul class="research-card-list">
+                <li>366 raw aerial frames: 50,821 Cotton (Class 1) and 5,713 Weed (Class 0) boxes</li>
+                <li>Weed species: Palmer amaranth, Russian thistle, and kochia</li>
+                <li>80/20 split (random_state=42): 7,399 augmented training and 1,850 validation images</li>
               </ul>
             </div>
-            <a href="#workbench" class="btn-pill btn-primary">Start 14-Day Field Trial</a>
-          </div>
 
-          <div class="pricing-card">
-            <div class="pricing-card-top">
-              <div class="pricing-title-row"><div class="pricing-plan-name">Autonomous Fleet</div></div>
-              <div class="pricing-price-row"><span class="pricing-amount tabular-nums">Custom</span><span class="pricing-period">/ annual fleet</span></div>
-              <p class="pricing-summary">Embedded computer vision runtime for drone fleet swarms and automated tractor booms.</p>
-              <ul class="pricing-feature-list">
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>All Commercial Agronomy features</span></li>
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>DJI Onboard SDK / Edge GPU integration</span></li>
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>Real-time RTSP/RTMP drone telemetry stream</span></li>
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>Sub-50ms weed centroid targeting</span></li>
-                <li class="pricing-feature-item"><svg class="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg><span>Air-gapped on-premise installation</span></li>
+            <div class="research-card">
+              <div>
+                <div class="research-card-kicker">Methodology [7, 12, 19, 22-29]</div>
+                <h3 class="research-card-title">YOLOv8n Transfer Learning</h3>
+                <p class="research-card-desc">
+                  Fine-tuned COCO-pretrained YOLOv8n (yolov8n.pt) over 50 epochs (batch 16, 640 x 640, FP16 on Tesla T4 GPU) with AdamW optimization and Mosaic augmentation.
+                </p>
+              </div>
+              <ul class="research-card-list">
+                <li>Overall mAP@0.5: 84.9% | Cotton mAP@0.5: 93.8% | Weed mAP@0.5: 76.0%</li>
+                <li>Peak F1 score of 0.79 at 0.289 confidence threshold across 11,056 validation instances</li>
+                <li>6.8 ms total frame latency (147 FPS GPU throughput) with 0.70 NMS IoU</li>
               </ul>
             </div>
-            <a href="#closing" class="btn-pill btn-secondary">Contact Engineering</a>
+
+            <div class="research-card">
+              <div>
+                <div class="research-card-kicker">Deployment [16-18, 30-35]</div>
+                <h3 class="research-card-title">Reproducible One-Command Stack</h3>
+                <p class="research-card-desc">
+                  Structured as a three-tier Dockerized React, Flask, and OpenCV/Ultralytics application designed for one-command execution in field and lab environments.
+                </p>
+              </div>
+              <ul class="research-card-list">
+                <li>Run <code>run.bat</code> (Windows) or <code>bash deployment-script.sh</code> (Linux/Docker)</li>
+                <li>Thread-locked Flask job queue preventing concurrent session collisions</li>
+                <li>Full 76-page thesis report served directly at <code>/Final_Report.pdf</code></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -572,11 +632,12 @@
         <div class="closing-banner">
           <div class="closing-copy">
             <h2 class="closing-title">Target weeds with surgical accuracy. Protect your cotton yield today.</h2>
-            <p class="closing-sub">Deploy the local Docker container in minutes or test drone footage in the interactive workbench.</p>
+            <p class="closing-sub">Launch the entire stack locally in one command with run.bat or read the complete University of the Fraser Valley thesis report.</p>
           </div>
           <div class="closing-actions">
             <a href="#workbench" class="btn-pill btn-primary">Launch Live Workbench</a>
-            <a href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing" target="_blank" rel="noreferrer" class="btn-pill btn-inverse-secondary">Download UAV Dataset</a>
+            <a href="/Final_Report.pdf" target="_blank" rel="noreferrer" class="btn-pill btn-inverse-secondary">Read Final Report (PDF)</a>
+            <a href="https://github.com/SidhuManbirSingh/Cotton-Weed-Prediction-Model/" target="_blank" rel="noreferrer" class="btn-pill btn-inverse-secondary">GitHub Repository</a>
           </div>
         </div>
       </div>
@@ -598,9 +659,9 @@
               </svg>
               <span>CottonVision</span>
             </a>
-            <p class="footer-brand-desc">High-throughput drone computer vision for automated weed detection, selective herbicide spraying, and agricultural dataset generation.</p>
+            <p class="footer-brand-desc">Directed Studies research by Manbir Singh Sidhu under Professor Omer Waqar, University of the Fraser Valley. High-throughput drone vision for selective weed control.</p>
             <div class="footer-social-row">
-              <a href="https://github.com" target="_blank" rel="noreferrer" class="footer-social-link" aria-label="GitHub Repository">
+              <a href="https://github.com/SidhuManbirSingh/Cotton-Weed-Prediction-Model/" target="_blank" rel="noreferrer" class="footer-social-link" aria-label="GitHub Repository">
                 <svg class="footer-social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" /></svg>
               </a>
               <a href="https://youtu.be/bO3l2jyvdKA" target="_blank" rel="noreferrer" class="footer-social-link" aria-label="YouTube Walkthrough">
@@ -613,35 +674,35 @@
             <ul class="footer-link-list">
               <li><a href="#workbench" class="footer-link">Inference Workbench</a></li>
               <li><a href="#features" class="footer-link">Dual-Path Engine</a></li>
-              <li><a href="#features" class="footer-link">Frame Skip Controls</a></li>
-              <li><a href="#benchmarks" class="footer-link">Model Benchmarks</a></li>
-              <li><a href="#pricing" class="footer-link">Pricing &amp; Plans</a></li>
+              <li><a href="#workflow" class="footer-link">Arrow Workflow</a></li>
+              <li><a href="#research" class="footer-link">Academic Research</a></li>
+              <li><a href="#faq" class="footer-link">Technical FAQ</a></li>
             </ul>
           </div>
           <div>
             <div class="footer-col-heading">Model &amp; Data</div>
             <ul class="footer-link-list">
-              <li><a href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing" target="_blank" rel="noreferrer" class="footer-link">UAV Cotton Dataset</a></li>
-              <li><a href="#benchmarks" class="footer-link">YOLOv8 Weights</a></li>
-              <li><a href="#features" class="footer-link">OpenVINO Config</a></li>
-              <li><a href="#features" class="footer-link">Confusion Matrix</a></li>
-              <li><a href="#faq" class="footer-link">Precision Metrics</a></li>
+              <li><a href="https://doi.org/10.17632/fwg6pt6ckd.1" target="_blank" rel="noreferrer" class="footer-link">Mendeley UAV Dataset [15]</a></li>
+              <li><a href="#research" class="footer-link">YOLOv8n Benchmarks</a></li>
+              <li><a href="#features" class="footer-link">OpenVINO Runtime</a></li>
+              <li><a href="#features" class="footer-link">Validation Metrics</a></li>
+              <li><a href="https://github.com/SidhuManbirSingh/Cotton-Weed-Prediction-Model/" target="_blank" rel="noreferrer" class="footer-link">GitHub Repository</a></li>
             </ul>
           </div>
           <div>
             <div class="footer-col-heading">Documentation</div>
             <ul class="footer-link-list">
-              <li><a href="#features" class="footer-link">Deployment Guide</a></li>
+              <li><a href="/Final_Report.pdf" target="_blank" rel="noreferrer" class="footer-link">Final Report (PDF)</a></li>
+              <li><a href="#workflow" class="footer-link">Single-Command run.bat</a></li>
               <li><a href="#faq" class="footer-link">H.264 Playback Fix</a></li>
               <li><a href="#features" class="footer-link">Temporal Sync Math</a></li>
-              <li><a href="#features" class="footer-link">Docker Compose</a></li>
               <li><a href="https://youtu.be/bO3l2jyvdKA" target="_blank" rel="noreferrer" class="footer-link">Video Walkthrough</a></li>
             </ul>
           </div>
         </div>
         <div class="footer-bottom-row">
-          <span>&copy; 2026 CottonVision AI. Precision drone imagery analysis for sustainable agriculture.</span>
-          <span>WCAG AA &amp; APCA Lc 75 Verified · Host Grotesk System</span>
+          <span>&copy; 2026 CottonVision · University of the Fraser Valley Directed Studies · Manbir Singh Sidhu under Professor Omer Waqar.</span>
+          <span>Open-Source MIT · Host Grotesk System</span>
         </div>
       </div>
     </footer>
