@@ -18,19 +18,14 @@ dist-ssr/
 *.onnx
 best_openvino_model/
 backend/data/
-samples/
+/samples/
 *.mp4
-
-# System / IDEs
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
 
 # Removing the heavy files from the repo
 frontend/node_modules/*
-samples/*
+/samples/*
 test/*
 backend/data/*
 backend/output/*
+!frontend/public/samples/
 
