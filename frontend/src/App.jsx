@@ -1,6 +1,157 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 
 const API = ''
+const GITHUB_REPO_URL = 'https://github.com/SidhuManbirSingh/Cotton-Weed-Prediction-Model/'
+const FINAL_REPORT_URL = '/Final_Report.pdf'
+const MENDELEY_DATASET_URL = 'https://doi.org/10.17632/fwg6pt6ckd.1'
+
+const WORKFLOW_DIAGRAMS = [
+  {
+    title: 'Single-Command Project Startup Flow',
+    subtitle: 'Automated local launch and dependency setup with zero manual configuration.',
+    tag: 'run.bat · deployment-script.sh',
+    steps: [
+      {
+        step: '01',
+        role: 'Launch',
+        title: 'Execute One Script',
+        desc: 'Run run.bat on Windows or bash deployment-script.sh on Linux/macOS to initialize the environment.',
+        code: 'run.bat / deployment-script.sh',
+        accent: true,
+      },
+      {
+        step: '02',
+        role: 'Validate',
+        title: 'Verify Runtime & Model',
+        desc: 'Confirms Python 3.10+, installs dependencies, checks FFmpeg/OpenCV, and verifies YOLOv8n weights.',
+        code: 'YOLOv8n (yolov8n.pt)',
+      },
+      {
+        step: '03',
+        role: 'Boot',
+        title: 'Start Flask & Web UI',
+        desc: 'Boots the threaded Flask REST backend on port 5000 and serves the frontend workbench.',
+        code: 'localhost:5000 / 3000',
+      },
+      {
+        step: '04',
+        role: 'Operate',
+        title: 'Inspect & Export Live',
+        desc: 'Open http://127.0.0.1:5000 to upload UAV media, tune frame skip, and download H.264/YOLO ZIP outputs.',
+        code: 'HTTP 200 OK',
+        accent: true,
+      },
+    ],
+  },
+  {
+    title: 'UAV Media Inference & Export Flow',
+    subtitle: 'Deterministic end-to-end processing pipeline inside the Flask and YOLOv8n engine.',
+    tag: 'POST /api/process · Thread-Locked',
+    steps: [
+      {
+        step: '01',
+        role: 'Ingest',
+        title: 'Upload Drone Media',
+        desc: 'Validates uploaded 4K aerial frames or MP4/AVI flight videos and stages isolated session storage.',
+        code: 'POST /api/upload',
+      },
+      {
+        step: '02',
+        role: 'Detect',
+        title: 'YOLOv8n Inference',
+        desc: 'Samples frames at interval N and classifies Cotton (Class 1) vs. Weed (Class 0) bounding boxes.',
+        code: '640x640 · 6.8 ms GPU',
+        accent: true,
+      },
+      {
+        step: '03',
+        role: 'Transcode',
+        title: 'Sync FPS & H.264',
+        desc: 'Computes Output FPS = Source FPS / N and encodes browser-native faststart H.264 MP4 streams.',
+        code: 'ffmpeg avc1 + faststart',
+      },
+      {
+        step: '04',
+        role: 'Deliver',
+        title: 'Verify & Package ZIP',
+        desc: 'Streams side-by-side playback and compiles paired images/ and normalized labels/ archives.',
+        code: '/api/download/dataset/<id>',
+      },
+    ],
+  },
+]
+
+const RESEARCH_METHODOLOGY_CARDS = [
+  {
+    kicker: 'Dataset [15, 20, 21]',
+    title: 'Texas Panhandle UAV Corpus',
+    desc: 'Built on the peer-reviewed Mendeley UAV Cotton-Weed dataset captured using an Autel Robotics EVO II Dual 640T V3 drone at 4096 x 3072 resolution.',
+    bullets: [
+      '366 raw aerial frames: 50,821 Cotton (Class 1) and 5,713 Weed (Class 0) boxes',
+      'Weed species: Palmer amaranth, Russian thistle, and kochia',
+      '80/20 split (random_state=42): 7,399 augmented training and 1,850 validation images',
+    ],
+  },
+  {
+    kicker: 'Methodology [7, 12, 19, 22-29]',
+    title: 'YOLOv8n Transfer Learning',
+    desc: 'Fine-tuned COCO-pretrained YOLOv8n (yolov8n.pt) over 50 epochs (batch 16, 640 x 640, FP16 on Tesla T4 GPU) with AdamW optimization and Mosaic augmentation.',
+    bullets: [
+      'Overall mAP@0.5: 84.9% | Cotton mAP@0.5: 93.8% | Weed mAP@0.5: 76.0%',
+      'Peak F1 score of 0.79 at 0.289 confidence threshold across 11,056 validation instances',
+      '6.8 ms total frame latency (147 FPS GPU throughput) with 0.70 NMS IoU',
+    ],
+  },
+  {
+    kicker: 'Deployment [16-18, 30-35]',
+    title: 'Reproducible One-Command Stack',
+    desc: 'Structured as a three-tier Dockerized React, Flask, and OpenCV/Ultralytics application designed for one-command execution in field and lab environments.',
+    bullets: [
+      'Run run.bat (Windows) or bash deployment-script.sh (Linux/Docker)',
+      'Thread-locked Flask job queue preventing concurrent session collisions',
+      'Full 76-page thesis report served directly at Final_Report.pdf',
+    ],
+  },
+]
+
+function WorkflowDiagram({ flow }) {
+  return (
+    <div className="workflow-flow">
+      <div className="workflow-flow-head">
+        <div>
+          <h3 className="workflow-flow-title">{flow.title}</h3>
+          <p className="workflow-flow-subtitle">{flow.subtitle}</p>
+        </div>
+        <span className="workflow-flow-tag">{flow.tag}</span>
+      </div>
+      <div className="workflow-row">
+        {flow.steps.map((item, idx) => (
+          <div key={item.step} style={{ display: 'contents' }}>
+            <div className={`workflow-node ${item.accent ? 'accent-node' : ''}`}>
+              <div>
+                <div className="workflow-node-top">
+                  <span className="workflow-node-step">{item.step}</span>
+                  <span className="workflow-node-role">{item.role}</span>
+                </div>
+                <h4 className="workflow-node-title" style={{ marginTop: '12px' }}>{item.title}</h4>
+                <p className="workflow-node-desc">{item.desc}</p>
+              </div>
+              <div className="workflow-node-code">{item.code}</div>
+            </div>
+            {idx < flow.steps.length - 1 && (
+              <div className="workflow-arrow" aria-hidden="true">
+                <svg className="workflow-arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14" />
+                  <path d="M13 6l6 6-6 6" />
+                </svg>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 function useToasts() {
   const [toasts, setToasts] = useState([])
@@ -202,19 +353,27 @@ export default function App() {
             <nav className="site-nav" aria-label="Main Navigation">
               <a href="#workbench" className="site-nav-link">Workbench</a>
               <a href="#features" className="site-nav-link">Pipeline</a>
-              <a href="#benchmarks" className="site-nav-link">Benchmarks</a>
-              <a href="#pricing" className="site-nav-link">Pricing</a>
+              <a href="#workflow" className="site-nav-link">Workflow</a>
+              <a href="#research" className="site-nav-link">Research</a>
             </nav>
 
-            {/* Actions: Secondary Dataset Link + Primary Pill Button */}
+            {/* Actions: Final Report, GitHub & Primary Pill Button */}
             <div className="site-header-actions">
               <a
-                href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing"
+                href={FINAL_REPORT_URL}
                 target="_blank"
                 rel="noreferrer"
                 className="site-nav-link"
               >
-                Dataset
+                Final Report
+              </a>
+              <a
+                href={GITHUB_REPO_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="site-nav-link"
+              >
+                GitHub
               </a>
               <a href="#workbench" className="btn-pill btn-primary btn-sm">
                 Open Workbench
@@ -243,18 +402,26 @@ export default function App() {
             <div className="mobile-nav-links">
               <a href="#workbench" className="site-nav-link" onClick={() => setMobileMenuOpen(false)}>Workbench</a>
               <a href="#features" className="site-nav-link" onClick={() => setMobileMenuOpen(false)}>Pipeline</a>
-              <a href="#benchmarks" className="site-nav-link" onClick={() => setMobileMenuOpen(false)}>Benchmarks</a>
-              <a href="#pricing" className="site-nav-link" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
+              <a href="#workflow" className="site-nav-link" onClick={() => setMobileMenuOpen(false)}>Workflow</a>
+              <a href="#research" className="site-nav-link" onClick={() => setMobileMenuOpen(false)}>Research</a>
               <a href="#faq" className="site-nav-link" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
             </div>
             <div className="mobile-nav-actions">
               <a
-                href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing"
+                href={FINAL_REPORT_URL}
                 target="_blank"
                 rel="noreferrer"
                 className="btn-pill btn-secondary btn-sm"
               >
-                Download Dataset
+                Final Report (PDF)
+              </a>
+              <a
+                href={GITHUB_REPO_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-pill btn-secondary btn-sm"
+              >
+                GitHub Repository
               </a>
               <a href="#workbench" className="btn-pill btn-primary btn-sm" onClick={() => setMobileMenuOpen(false)}>
                 Launch Inference Studio
@@ -300,7 +467,7 @@ export default function App() {
               </div>
 
               <div className="hero-trust-caption">
-                OpenVINO GPU accelerated · Browser-native H.264 output · Instant .zip YOLO labels
+                UFV Directed Studies Research · One-command run.bat startup · Instant .zip YOLO labels
               </div>
 
               <div className="hero-figures">
@@ -313,8 +480,8 @@ export default function App() {
                   <div className="hero-figure-label">Weed detection mAP@50</div>
                 </div>
                 <div className="hero-figure-item">
-                  <div className="hero-figure-value tabular-nums">5×</div>
-                  <div className="hero-figure-label">Faster video throughput</div>
+                  <div className="hero-figure-value tabular-nums">147 FPS</div>
+                  <div className="hero-figure-label">Real-time GPU throughput · 6.8 ms latency</div>
                 </div>
               </div>
             </div>
@@ -793,297 +960,94 @@ export default function App() {
       </section>
 
       {/* ====================================================================
-          5. PROCESS (saas-5, variation: track, 3 connected steps)
+          5. DEPLOYMENT & INFERENCE WORKFLOW (Visual arrow-connected flows)
           ==================================================================== */}
-      <section id="benchmarks" className="band process-band">
+      <section id="workflow" className="band workflow-band">
         <div className="container">
           <div className="section-header">
-            <span className="section-kicker">Deployment Workflow</span>
-            <h2 className="section-title">From Drone SD Card to Prescription Spraying</h2>
+            <span className="section-kicker">Deployment &amp; Inference Workflow</span>
+            <h2 className="section-title">End-to-End Arrow Architecture</h2>
             <p className="section-subtitle">
-              Three deterministic steps turn raw multispectral or RGB aerial footage into actionable precision agriculture datasets.
+              Visual stage-by-stage execution flow from single-command local launch to YOLOv8n detection and normalized dataset packaging.
             </p>
           </div>
 
-          <div className="process-track">
-            {/* Step 1 */}
-            <div className="process-step-card">
-              <div className="process-step-top">
-                <span className="process-step-number">01</span>
-                <span className="process-connector-label">PHASE 1 →</span>
-              </div>
-              <div>
-                <h3 className="process-step-heading">Ingest UAV Flight Media</h3>
-                <p className="process-step-desc">
-                  Drop orthomosaic geotiffs or raw 4K MP4 drone video straight into the workbench. CottonVision validates the stream, extracts frames at your chosen interval, and reads embedded flight timestamps.
-                </p>
-              </div>
-              <div className="process-step-meta">
-                Input: MP4 / AVI / JPG / PNG · Auto-routing
-              </div>
-            </div>
-
-            {/* Step 2 */}
-            <div className="process-step-card">
-              <div className="process-step-top">
-                <span className="process-step-number">02</span>
-                <span className="process-connector-label">PHASE 2 →</span>
-              </div>
-              <div>
-                <h3 className="process-step-heading">Execute OpenVINO YOLOv8 Inference</h3>
-                <p className="process-step-desc">
-                  The trained neural network segments cotton plants from weed clusters at flight speed. Intel OpenVINO runtime optimizes the model across available GPU and CPU cores with minimal memory overhead.
-                </p>
-              </div>
-              <div className="process-step-meta">
-                Benchmark: 93.8% Cotton mAP@50 · 76.0% Weed mAP@50
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="process-step-card">
-              <div className="process-step-top">
-                <span className="process-step-number">03</span>
-                <span className="process-connector-label">PHASE 3</span>
-              </div>
-              <div>
-                <h3 className="process-step-heading">Validate Side-by-Side & Export Labels</h3>
-                <p className="process-step-desc">
-                  Inspect the dual-pane player for false positives, verify weed cluster densities, and instantly export reconstructed H.264 video, high-resolution snapshots, and complete YOLO dataset archives (.zip).
-                </p>
-              </div>
-              <div className="process-step-meta">
-                Output: H.264 Video · YOLOv8 .txt · Snapshot .jpg
-              </div>
-            </div>
+          <div className="workflow-stack">
+            {WORKFLOW_DIAGRAMS.map(flow => (
+              <WorkflowDiagram key={flow.title} flow={flow} />
+            ))}
           </div>
         </div>
       </section>
 
       {/* ====================================================================
-          6. TESTIMONIALS (saas-6, variation: lead, 1 prominent + 2 supporting)
+          6. ACADEMIC RESEARCH & METHODOLOGY (University of the Fraser Valley)
           ==================================================================== */}
-      <section className="band testimonials-band">
+      <section id="research" className="band research-band">
         <div className="container">
           <div className="section-header">
-            <span className="section-kicker">Field Proof</span>
-            <h2 className="section-title">Validated Across 45,000 Commercial Cotton Acres</h2>
+            <span className="section-kicker">Academic Research</span>
+            <h2 className="section-title">Directed Studies at University of the Fraser Valley</h2>
             <p className="section-subtitle">
-              Agronomists and aerial operators rely on CottonVision to cut chemical costs and eliminate herbicide waste.
+              Computer vision research and engineering conducted by Manbir Singh Sidhu under the supervision and guidance of Professor Omer Waqar at the University of the Fraser Valley (UFV).
             </p>
           </div>
 
-          <div className="testimonials-layout">
-            {/* Prominent Lead Quote */}
-            <div className="testimonial-lead-card">
+          <div className="research-layout">
+            <div className="research-banner">
               <div>
-                <blockquote className="testimonial-lead-quote">
-                  “CottonVision cut our herbicide spray volume by 42% in our first season across 12,000 acres. Rather than blanket spraying entire sectors, our boom sprayers now target verified weed clusters identified from morning drone flights.”
-                </blockquote>
-                <div className="testimonial-author-row">
-                  <div className="testimonial-avatar">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#201f20" strokeWidth="1.8">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                  </div>
+                <h3 className="research-lead-title">Full Research Paper &amp; Open-Source Codebase</h3>
+                <p className="research-lead-copy">
+                  Everything in this system was performed under the instructions and guidance of Professor Omer Waqar at the University of the Fraser Valley. Read the complete 76-page Directed Studies Final Report for full experimental proofs, launch everything immediately via <code>run.bat</code>, or inspect the source repository on GitHub.
+                </p>
+                <div className="research-actions-row">
+                  <a href={FINAL_REPORT_URL} target="_blank" rel="noreferrer" className="btn-pill btn-primary btn-sm">
+                    Read Final Report (PDF)
+                  </a>
+                  <a href={GITHUB_REPO_URL} target="_blank" rel="noreferrer" className="btn-pill btn-secondary btn-sm">
+                    View GitHub Repository
+                  </a>
+                  <a href={MENDELEY_DATASET_URL} target="_blank" rel="noreferrer" className="btn-pill btn-secondary btn-sm">
+                    Mendeley Dataset [15]
+                  </a>
+                </div>
+              </div>
+
+              <div className="research-attribution-panel">
+                <div className="research-meta-row">
+                  <span className="research-meta-label">Institution</span>
+                  <span className="research-meta-value">University of the Fraser Valley (UFV)</span>
+                </div>
+                <div className="research-meta-row">
+                  <span className="research-meta-label">Supervisor</span>
+                  <span className="research-meta-value">Professor Omer Waqar</span>
+                </div>
+                <div className="research-meta-row">
+                  <span className="research-meta-label">Author &amp; Researcher</span>
+                  <span className="research-meta-value">Manbir Singh Sidhu</span>
+                </div>
+                <div className="research-meta-row">
+                  <span className="research-meta-label">Quick Launch Scripts</span>
+                  <span className="research-meta-value">run.bat (Windows) · deployment-script.sh</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="research-grid">
+              {RESEARCH_METHODOLOGY_CARDS.map(card => (
+                <div key={card.kicker} className="research-card">
                   <div>
-                    <div className="testimonial-author-name">Dr. Marcus Vance</div>
-                    <div className="testimonial-author-role">Chief Agronomist, Delta Ag Research Group</div>
+                    <div className="research-card-kicker">{card.kicker}</div>
+                    <h3 className="research-card-title">{card.title}</h3>
+                    <p className="research-card-desc">{card.desc}</p>
                   </div>
+                  <ul className="research-card-list">
+                    {card.bullets.map(bullet => (
+                      <li key={bullet}>{bullet}</li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
-
-              <div className="testimonial-lead-stat-panel">
-                <div className="testimonial-stat-big tabular-nums">42%</div>
-                <div className="testimonial-stat-caption">
-                  Chemical herbicide savings achieved across 12,000 commercial Mississippi Delta acres.
-                </div>
-              </div>
-            </div>
-
-            {/* 2 Smaller Supporting Quotes */}
-            <div className="testimonials-supporting-grid">
-              <div className="testimonial-support-card">
-                <p className="testimonial-support-quote">
-                  “The temporal frame synchronization solved our video playback issues completely. We get high-confidence weed detection in 4K drone flights without losing flight time accuracy or crashing field laptops.”
-                </p>
-                <div className="testimonial-author-row">
-                  <div className="testimonial-avatar">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#201f20" strokeWidth="1.8">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="testimonial-author-name">Elena Rostova</div>
-                    <div className="testimonial-author-role">UAV Operations Lead, Aerial Precision Labs</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="testimonial-support-card">
-                <p className="testimonial-support-quote">
-                  “Exporting ready-to-train YOLO datasets straight from our field flights allowed us to adapt the model to late-season cocklebur in under three days. It is the most practical CV tool we have deployed.”
-                </p>
-                <div className="testimonial-author-row">
-                  <div className="testimonial-avatar">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#201f20" strokeWidth="1.8">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="testimonial-author-name">Carlos Mendez</div>
-                    <div className="testimonial-author-role">Autonomous Systems Engineer, Sunbelt Spraying</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ====================================================================
-          7. PRICING (saas-7, variation: signature, 3 plans side-by-side)
-          ==================================================================== */}
-      <section id="pricing" className="band pricing-band">
-        <div className="container">
-          <div className="section-header">
-            <span className="section-kicker">Transparent Plans</span>
-            <h2 className="section-title">Scalable Inference for Research and Fleet Ops</h2>
-            <p className="section-subtitle">
-              Run locally with complete open-source transparency or deploy managed GPU pipelines across commercial flight operations.
-            </p>
-          </div>
-
-          <div className="pricing-grid">
-            {/* Plan 1: Field Researcher */}
-            <div className="pricing-card">
-              <div className="pricing-card-top">
-                <div className="pricing-title-row">
-                  <div className="pricing-plan-name">Field Researcher</div>
-                </div>
-                <div className="pricing-price-row">
-                  <span className="pricing-amount tabular-nums">$0</span>
-                  <span className="pricing-period">/ open source</span>
-                </div>
-                <p className="pricing-summary">
-                  Full local inference engine for independent growers and university research labs.
-                </p>
-                <ul className="pricing-feature-list">
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>Local OpenVINO inference (CPU/GPU)</span>
-                  </li>
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>Unlimited static orthomosaic processing</span>
-                  </li>
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>Up to 5-minute flight video batches</span>
-                  </li>
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>Standard YOLOv8 annotation export</span>
-                  </li>
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>Self-hosted Docker container</span>
-                  </li>
-                </ul>
-              </div>
-              <a href="#workbench" className="btn-pill btn-secondary">
-                Deploy Local Engine
-              </a>
-            </div>
-
-            {/* Plan 2: Commercial Agronomy (RECOMMENDED) */}
-            <div className="pricing-card recommended">
-              <div className="pricing-card-top">
-                <div className="pricing-title-row">
-                  <div className="pricing-plan-name">Commercial Agronomy</div>
-                  <span className="pricing-recommended-pill">Recommended</span>
-                </div>
-                <div className="pricing-price-row">
-                  <span className="pricing-amount tabular-nums">$180</span>
-                  <span className="pricing-period">/ operator / mo</span>
-                </div>
-                <p className="pricing-summary">
-                  High-speed processing pipeline for agricultural drone consultants and spraying contractors.
-                </p>
-                <ul className="pricing-feature-list">
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>All Field Researcher capabilities</span>
-                  </li>
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>Unlimited 4K drone video flight queueing</span>
-                  </li>
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>Adjustable 1x to 15x frame skip sync</span>
-                  </li>
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>Automated H.264 browser streaming</span>
-                  </li>
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>Instant ZIP dataset packaging</span>
-                  </li>
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>Variable-rate boom sprayer map export</span>
-                  </li>
-                </ul>
-              </div>
-              <a href="#workbench" className="btn-pill btn-primary">
-                Start 14-Day Field Trial
-              </a>
-            </div>
-
-            {/* Plan 3: Autonomous Fleet */}
-            <div className="pricing-card">
-              <div className="pricing-card-top">
-                <div className="pricing-title-row">
-                  <div className="pricing-plan-name">Autonomous Fleet</div>
-                </div>
-                <div className="pricing-price-row">
-                  <span className="pricing-amount tabular-nums">Custom</span>
-                  <span className="pricing-period">/ annual fleet</span>
-                </div>
-                <p className="pricing-summary">
-                  Embedded computer vision runtime for drone fleet swarms and automated tractor booms.
-                </p>
-                <ul className="pricing-feature-list">
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>All Commercial Agronomy features</span>
-                  </li>
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>DJI Onboard SDK / Edge GPU integration</span>
-                  </li>
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>Real-time RTSP/RTMP drone telemetry stream</span>
-                  </li>
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>Sub-50ms weed centroid targeting</span>
-                  </li>
-                  <li className="pricing-feature-item">
-                    <svg className="pricing-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                    <span>Air-gapped on-premise installation</span>
-                  </li>
-                </ul>
-              </div>
-              <a href="#closing" className="btn-pill btn-secondary">
-                Contact Engineering
-              </a>
+              ))}
             </div>
           </div>
         </div>
@@ -1165,7 +1129,7 @@ export default function App() {
                 Target weeds with surgical accuracy. Protect your cotton yield today.
               </h2>
               <p className="closing-sub">
-                Deploy the local Docker container in minutes or test drone footage in the interactive workbench.
+                Launch the entire stack locally in one command with run.bat or read the complete University of the Fraser Valley thesis report.
               </p>
             </div>
             <div className="closing-actions">
@@ -1173,12 +1137,20 @@ export default function App() {
                 Launch Live Workbench
               </a>
               <a
-                href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing"
+                href={FINAL_REPORT_URL}
                 target="_blank"
                 rel="noreferrer"
                 className="btn-pill btn-inverse-secondary"
               >
-                Download UAV Dataset
+                Read Final Report (PDF)
+              </a>
+              <a
+                href={GITHUB_REPO_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-pill btn-inverse-secondary"
+              >
+                GitHub Repository
               </a>
             </div>
           </div>
@@ -1205,12 +1177,12 @@ export default function App() {
                 <span>CottonVision</span>
               </a>
               <p className="footer-brand-desc">
-                High-throughput drone computer vision for automated weed detection, selective herbicide spraying, and agricultural dataset generation.
+                Directed Studies research by Manbir Singh Sidhu under Professor Omer Waqar, University of the Fraser Valley. High-throughput drone vision for selective weed control.
               </p>
               <div className="footer-social-row">
                 {/* GitHub */}
                 <a
-                  href="https://github.com"
+                  href={GITHUB_REPO_URL}
                   target="_blank"
                   rel="noreferrer"
                   className="footer-social-link"
@@ -1242,9 +1214,9 @@ export default function App() {
               <ul className="footer-link-list">
                 <li><a href="#workbench" className="footer-link">Inference Workbench</a></li>
                 <li><a href="#features" className="footer-link">Dual-Path Engine</a></li>
-                <li><a href="#features" className="footer-link">Frame Skip Controls</a></li>
-                <li><a href="#benchmarks" className="footer-link">Model Benchmarks</a></li>
-                <li><a href="#pricing" className="footer-link">Pricing & Plans</a></li>
+                <li><a href="#workflow" className="footer-link">Arrow Workflow</a></li>
+                <li><a href="#research" className="footer-link">Academic Research</a></li>
+                <li><a href="#faq" className="footer-link">Technical FAQ</a></li>
               </ul>
             </div>
 
@@ -1252,11 +1224,11 @@ export default function App() {
             <div>
               <div className="footer-col-heading">Model &amp; Data</div>
               <ul className="footer-link-list">
-                <li><a href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing" target="_blank" rel="noreferrer" className="footer-link">UAV Cotton Dataset</a></li>
-                <li><a href="#benchmarks" className="footer-link">YOLOv8 Weights</a></li>
-                <li><a href="#features" className="footer-link">OpenVINO Config</a></li>
-                <li><a href="#features" className="footer-link">Confusion Matrix</a></li>
-                <li><a href="#faq" className="footer-link">Precision Metrics</a></li>
+                <li><a href={MENDELEY_DATASET_URL} target="_blank" rel="noreferrer" className="footer-link">Mendeley UAV Dataset [15]</a></li>
+                <li><a href="#research" className="footer-link">YOLOv8n Benchmarks</a></li>
+                <li><a href="#features" className="footer-link">OpenVINO Runtime</a></li>
+                <li><a href="#features" className="footer-link">Validation Metrics</a></li>
+                <li><a href={GITHUB_REPO_URL} target="_blank" rel="noreferrer" className="footer-link">GitHub Repository</a></li>
               </ul>
             </div>
 
@@ -1264,10 +1236,10 @@ export default function App() {
             <div>
               <div className="footer-col-heading">Documentation</div>
               <ul className="footer-link-list">
-                <li><a href="#features" className="footer-link">Deployment Guide</a></li>
+                <li><a href={FINAL_REPORT_URL} target="_blank" rel="noreferrer" className="footer-link">Final Report (PDF)</a></li>
+                <li><a href="#workflow" className="footer-link">Single-Command run.bat</a></li>
                 <li><a href="#faq" className="footer-link">H.264 Playback Fix</a></li>
                 <li><a href="#features" className="footer-link">Temporal Sync Math</a></li>
-                <li><a href="#features" className="footer-link">Docker Compose</a></li>
                 <li><a href="https://youtu.be/bO3l2jyvdKA" target="_blank" rel="noreferrer" className="footer-link">Video Walkthrough</a></li>
               </ul>
             </div>
@@ -1275,8 +1247,8 @@ export default function App() {
 
           {/* Footer Bottom Row */}
           <div className="footer-bottom-row">
-            <span>&copy; {new Date().getFullYear()} CottonVision AI. Precision drone imagery analysis for sustainable agriculture.</span>
-            <span>WCAG AA &amp; APCA Lc 75 Verified · Host Grotesk System</span>
+            <span>&copy; {new Date().getFullYear()} CottonVision · University of the Fraser Valley Directed Studies · Manbir Singh Sidhu under Professor Omer Waqar.</span>
+            <span>Open-Source MIT · Host Grotesk System</span>
           </div>
         </div>
       </footer>
