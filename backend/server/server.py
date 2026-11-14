@@ -338,12 +338,33 @@ def serve_frontend_static(filepath: str):
         return send_file(str(file_path))
     abort(404)
 
+def _send_project_file(*rel_parts: str, mimetype: str | None = None):
+    file_path = _PROJECT_ROOT.joinpath(*rel_parts).resolve()
+    if not str(file_path).startswith(str(_PROJECT_ROOT.resolve())):
+        abort(403)
+    if file_path.exists() and file_path.is_file():
+        return send_file(str(file_path), mimetype=mimetype)
+    abort(404)
+
+
 @app.route("/samples/<path:filepath>", methods=["GET"])
 def serve_samples_static(filepath: str):
-    file_path = (_PROJECT_ROOT / "samples" / filepath).resolve()
-    if file_path.exists() and file_path.is_file():
-        return send_file(str(file_path))
-    abort(404)
+    return _send_project_file("samples", filepath)
+
+
+@app.route("/favicon.svg", methods=["GET"])
+def serve_favicon_svg():
+    return _send_project_file("frontend", "public", "favicon.svg", mimetype="image/svg+xml")
+
+
+@app.route("/favicon.ico", methods=["GET"])
+def serve_favicon_ico():
+    return _send_project_file("frontend", "public", "favicon.ico", mimetype="image/x-icon")
+
+
+@app.route("/Final_Report.pdf", methods=["GET"])
+def serve_final_report():
+    return _send_project_file("Final_Report.pdf", mimetype="application/pdf")
 
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
