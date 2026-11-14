@@ -1025,175 +1025,255 @@ body,
 }
 
 /* ==========================================================================
-   Section 5: Process (saas-5, variation: track, 3 connected steps)
+   Section 5: Deployment & Inference Workflow (arrow-connected diagram flows)
    ========================================================================== */
 
-.process-track {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.workflow-stack {
+  display: flex;
+  flex-direction: column;
   gap: 24px;
-  position: relative;
 }
 
-.process-step-card {
+.workflow-flow {
   background-color: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--surface-corner);
   padding: 28px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   gap: 20px;
-  position: relative;
 }
 
-.process-step-top {
+.workflow-flow-head {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.workflow-flow-title {
+  font-size: var(--h3-size);
+  font-weight: var(--display-weight);
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+
+.workflow-flow-subtitle {
+  font-size: var(--small-size);
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.workflow-flow-tag {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background-color: var(--page-ground);
+  border: 1px solid var(--hairline);
+  border-radius: var(--control-corner);
+  padding: 4px 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.workflow-row {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.workflow-node {
+  flex: 1 1 0;
+  min-width: 0;
+  background-color: var(--page-ground);
+  border: 1px solid var(--hairline);
+  border-radius: var(--surface-corner);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
   justify-content: space-between;
   gap: 12px;
 }
 
-.process-step-number {
+.workflow-node.accent-node {
+  border-color: var(--accent);
+}
+
+.workflow-node-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.workflow-node-step {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 32px;
-  padding: 0 12px;
+  height: 26px;
+  padding: 0 10px;
   border-radius: var(--control-corner);
-  background-color: var(--page-ground);
+  background-color: var(--surface);
   border: 1px solid var(--hairline);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
 }
 
-.process-connector-label {
+.workflow-node.accent-node .workflow-node-step {
+  background-color: var(--accent-subtle);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.workflow-node-role {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.workflow-node-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+
+.workflow-node-desc {
+  font-size: var(--small-size);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.workflow-node-code {
   font-size: 12px;
   color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.process-step-heading {
-  font-size: var(--h3-size);
-  font-weight: var(--display-weight);
-  line-height: 1.25;
-  color: var(--text-primary);
-  margin-bottom: 10px;
-}
-
-.process-step-desc {
-  font-size: 15px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.process-step-meta {
-  font-size: var(--caption-size);
-  color: var(--text-muted);
-  padding-top: 14px;
+  padding-top: 10px;
   border-top: 1px solid var(--hairline);
   font-variant-numeric: tabular-nums;
+  word-break: break-word;
 }
 
-@media (max-width: 860px) {
-  .process-track {
-    grid-template-columns: 1fr;
+.workflow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.workflow-arrow-svg {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.2s ease;
+}
+
+@media (max-width: 960px) {
+  .workflow-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .workflow-arrow {
+    padding: 2px 0;
+  }
+
+  .workflow-arrow-svg {
+    transform: rotate(90deg);
   }
 }
 
 /* ==========================================================================
-   Section 6: Testimonials (saas-6, variation: lead, 1 prominent + 2 supporting)
+   Section 6: Academic Research & Methodology (UFV Directed Studies)
    ========================================================================== */
 
-.testimonials-layout {
+.research-layout {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.testimonial-lead-card {
+.research-banner {
   background-color: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--surface-corner);
-  padding: 40px;
+  padding: 36px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
-  gap: 40px;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 36px;
   align-items: center;
 }
 
-.testimonial-lead-quote {
+.research-lead-title {
   font-size: 24px;
-  font-weight: 400;
-  line-height: 1.42;
+  font-weight: var(--display-weight);
+  line-height: 1.32;
   letter-spacing: -0.015em;
   color: var(--text-primary);
-  margin-bottom: 28px;
+  margin-bottom: 12px;
 }
 
-.testimonial-author-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.testimonial-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--control-corner);
-  border: 1px solid var(--hairline);
-  background-color: var(--page-ground);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.testimonial-author-name {
+.research-lead-copy {
   font-size: 15px;
-  font-weight: 500;
-  color: var(--text-primary);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 22px;
 }
 
-.testimonial-author-role {
-  font-size: var(--caption-size);
-  color: var(--text-muted);
+.research-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.testimonial-lead-stat-panel {
+.research-attribution-panel {
   background-color: var(--page-ground);
   border: 1px solid var(--hairline);
   border-radius: var(--surface-corner);
   padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
 }
 
-.testimonial-stat-big {
-  font-size: 36px;
-  font-weight: var(--display-weight);
-  line-height: 1.05;
+.research-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.research-meta-row:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.research-meta-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.research-meta-value {
+  font-size: 15px;
+  font-weight: 500;
   color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
 }
 
-.testimonial-stat-caption {
-  font-size: var(--caption-size);
-  color: var(--text-secondary);
-  line-height: 1.45;
-}
-
-.testimonials-supporting-grid {
+.research-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
 }
 
-.testimonial-support-card {
+.research-card {
   background-color: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--surface-corner);
@@ -1201,144 +1281,61 @@ body,
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 24px;
+  gap: 18px;
 }
 
-.testimonial-support-quote {
-  font-size: 16px;
+.research-card-kicker {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.research-card-title {
+  font-size: var(--h3-size);
+  font-weight: var(--display-weight);
+  color: var(--text-primary);
+  line-height: 1.25;
+  margin-bottom: 10px;
+}
+
+.research-card-desc {
+  font-size: var(--small-size);
   color: var(--text-secondary);
   line-height: 1.6;
 }
 
-@media (max-width: 860px) {
-  .testimonial-lead-card {
+.research-card-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.research-card-list code {
+  background-color: var(--page-ground);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+@media (max-width: 960px) {
+  .research-banner {
     grid-template-columns: 1fr;
     padding: 28px;
     gap: 24px;
   }
 
-  .testimonial-lead-quote {
-    font-size: 20px;
-  }
-
-  .testimonials-supporting-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ==========================================================================
-   Section 7: Pricing (saas-7, variation: signature, 3 side-by-side plans)
-   ========================================================================== */
-
-.pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
-  align-items: stretch;
-}
-
-.pricing-card {
-  background-color: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--surface-corner);
-  padding: 32px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 28px;
-}
-
-.pricing-card.recommended {
-  background-color: var(--page-ground);
-  border: 2px solid var(--accent);
-}
-
-.pricing-card-top {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.pricing-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.pricing-plan-name {
-  font-size: var(--h3-size);
-  font-weight: var(--display-weight);
-  color: var(--text-primary);
-}
-
-.pricing-recommended-pill {
-  font-size: 12px;
-  font-weight: 500;
-  background-color: var(--primary-action-fill);
-  color: var(--primary-action-label);
-  padding: 3px 10px;
-  border-radius: var(--control-corner);
-}
-
-.pricing-price-row {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.pricing-amount {
-  font-size: 40px;
-  font-weight: var(--display-weight);
-  line-height: 1.05;
-  letter-spacing: -0.025em;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-.pricing-period {
-  font-size: var(--caption-size);
-  color: var(--text-muted);
-}
-
-.pricing-summary {
-  font-size: 15px;
-  color: var(--text-secondary);
-  line-height: 1.55;
-}
-
-.pricing-feature-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding-top: 20px;
-  border-top: 1px solid var(--hairline);
-}
-
-.pricing-feature-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: var(--small-size);
-  color: var(--text-secondary);
-  line-height: 1.45;
-}
-
-.pricing-check-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  color: var(--text-primary);
-  margin-top: 1px;
-}
-
-.pricing-card.recommended .pricing-check-icon {
-  color: var(--accent);
-}
-
-@media (max-width: 920px) {
-  .pricing-grid {
+  .research-grid {
     grid-template-columns: 1fr;
   }
 }
