@@ -14,7 +14,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 cd "$SCRIPT_DIR"
 
 echo "=================================================================="
-echo "🌱 CottonVision — UAV Cotton & Weed Detection System"
+echo "CottonVision — UAV Cotton & Weed Detection System"
 echo "=================================================================="
 echo "Working directory: $SCRIPT_DIR"
 
@@ -33,12 +33,12 @@ if command -v python3 &>/dev/null; then
 elif command -v python &>/dev/null; then
     PY_BIN="python"
 else
-    echo "❌ Error: Python is not installed or not in PATH."
+    echo "[ERROR] Python is not installed or not in PATH."
     echo "Please install Python 3.10+ (https://www.python.org/downloads/)."
     exit 1
 fi
 
-echo "✓ Using Python: $($PY_BIN --version 2>&1)"
+echo "[OK] Using Python: $($PY_BIN --version 2>&1)"
 
 # 2. Check & Install Python Dependencies
 echo "Checking Python backend dependencies..."
@@ -46,7 +46,7 @@ $PY_BIN -c "import flask, werkzeug, cv2, ultralytics" 2>/dev/null || {
     echo "Installing missing dependencies from requirements.txt..."
     $PY_BIN -m pip install -r requirements.txt
 }
-echo "✓ Python dependencies verified."
+echo "[OK] Python dependencies verified."
 
 # 3. Start Backend & Unified Web Server on port 5000
 echo "Starting Flask Backend & Web Application on port 5000..."
@@ -66,9 +66,9 @@ for i in {1..15}; do
 done
 
 if [ $SERVER_READY -eq 1 ]; then
-    echo "✓ CottonVision Server is live at: http://localhost:5000"
+    echo "[OK] CottonVision Server is live at: http://localhost:5000"
 else
-    echo "⚠️ Server started in background (PID: $BACKEND_PID). Continuing..."
+    echo "[WARN] Server started in background (PID: $BACKEND_PID). Continuing..."
 fi
 
 # 4. Check for Node.js / Vite Frontend (Optional enhancement)
@@ -81,9 +81,9 @@ if command -v npm &>/dev/null && [ -d "frontend" ]; then
     fi
     npm run dev &
     cd "$SCRIPT_DIR"
-    echo "✓ Vite frontend available at: http://localhost:3000"
+    echo "[OK] Vite frontend available at: http://localhost:3000"
 else
-    echo "ℹ️  Node.js not in PATH. Running in Unified Mode:"
+    echo "[INFO] Node.js not in PATH. Running in Unified Mode:"
     echo "   Complete interactive UI + Inference API served directly via http://localhost:5000"
 fi
 
@@ -91,7 +91,7 @@ fi
 URL="http://localhost:5000"
 echo ""
 echo "=================================================================="
-echo "🚀 Application is running!"
+echo "Application is running."
 echo "   Open your browser to: $URL"
 echo "   Press Ctrl+C to stop the server."
 echo "=================================================================="

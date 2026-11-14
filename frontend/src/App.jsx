@@ -769,14 +769,14 @@ export default function App() {
                     
                     {/* Images Column */}
                     <rect x="65" y="90" width="190" height="120" rx="6" fill="#f7f6f6" stroke="#e0e0df" strokeWidth="1" />
-                    <text x="80" y="115" fill="#201f20" fontSize="12" fontWeight="500" fontFamily="sans-serif">📁 images/</text>
+                    <text x="80" y="115" fill="#201f20" fontSize="12" fontWeight="500" fontFamily="sans-serif">images/</text>
                     <text x="95" y="140" fill="#606060" fontSize="11" fontFamily="sans-serif">frame_0001.jpg</text>
                     <text x="95" y="160" fill="#606060" fontSize="11" fontFamily="sans-serif">frame_0006.jpg</text>
                     <text x="95" y="180" fill="#606060" fontSize="11" fontFamily="sans-serif">frame_0011.jpg</text>
 
                     {/* Labels Column */}
                     <rect x="285" y="90" width="190" height="120" rx="6" fill="#f7f6f6" stroke="#e0e0df" strokeWidth="1" />
-                    <text x="300" y="115" fill="#201f20" fontSize="12" fontWeight="500" fontFamily="sans-serif">📁 labels/</text>
+                    <text x="300" y="115" fill="#201f20" fontSize="12" fontWeight="500" fontFamily="sans-serif">labels/</text>
                     <text x="315" y="140" fill="#2e5bff" fontSize="11" fontFamily="monospace">1 0.452 0.321 0.08 0.06</text>
                     <text x="315" y="160" fill="#2e5bff" fontSize="11" fontFamily="monospace">1 0.781 0.654 0.12 0.09</text>
                     <text x="315" y="180" fill="#0891b2" fontSize="11" fontFamily="monospace">0 0.214 0.441 0.22 0.18</text>
