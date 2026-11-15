@@ -4,6 +4,96 @@ const API = ''
 const GITHUB_REPO_URL = 'https://github.com/SidhuManbirSingh/Cotton-Weed-Prediction-Model/'
 const FINAL_REPORT_URL = '/Final_Report.pdf'
 const MENDELEY_DATASET_URL = 'https://doi.org/10.17632/fwg6pt6ckd.1'
+const SAMPLE_MP4_DRIVE_URL = '[GOOGLE_DRIVE_MP4_LINK]'
+
+const FRAMEWORK_LINKS = [
+  {
+    name: 'YOLO',
+    href: 'https://docs.ultralytics.com/',
+    icon: (
+      <svg className="logo-mark-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="3" y="3" width="18" height="18" rx="3" />
+        <path d="M7 12l3 3 7-7" />
+      </svg>
+    ),
+  },
+  {
+    name: 'OpenVINO',
+    href: 'https://docs.openvino.ai/',
+    icon: (
+      <svg className="logo-mark-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M8 12h8M12 8v8" />
+      </svg>
+    ),
+  },
+  {
+    name: 'PyTorch',
+    href: 'https://pytorch.org/',
+    icon: (
+      <svg className="logo-mark-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M14 4l-4 4-2-2 6-6 4 4zM8 16l-4 4 6 2 2-6z" />
+        <circle cx="15" cy="9" r="1.5" />
+      </svg>
+    ),
+  },
+  {
+    name: 'OpenCV',
+    href: 'https://opencv.org/',
+    icon: (
+      <svg className="logo-mark-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <circle cx="9" cy="8" r="4" />
+        <circle cx="15" cy="8" r="4" />
+        <circle cx="12" cy="15" r="4" />
+      </svg>
+    ),
+  },
+  {
+    name: 'DJI',
+    href: 'https://www.dji.com/',
+    icon: (
+      <svg className="logo-mark-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+      </svg>
+    ),
+  },
+  {
+    name: 'Docker',
+    href: 'https://www.docker.com/',
+    icon: (
+      <svg className="logo-mark-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M4 19c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2c0-3-2-6-7-6-1 0-2 .2-3 .6A4.5 4.5 0 0 0 4 19z" />
+        <rect x="7" y="9" width="3" height="3" />
+        <rect x="11" y="9" width="3" height="3" />
+        <rect x="15" y="9" width="3" height="3" />
+        <rect x="11" y="5" width="3" height="3" />
+      </svg>
+    ),
+  },
+]
+
+const WORKBENCH_GUIDE_ITEMS = [
+  {
+    badge: 'Flight 1',
+    title: 'Low-Altitude Weed Cluster',
+    desc: '4K aerial capture at 18m AGL isolating 14 sparse inter-row weeds with zero false-positive cotton damage.',
+  },
+  {
+    badge: 'Flight 2',
+    title: 'Dense Soil Boundary',
+    desc: '15m AGL pass demonstrating overlapping furrow weed emergence with 22 high-density bounding boxes.',
+  },
+  {
+    badge: 'Flight 3',
+    title: 'Validation Batch Rows',
+    desc: 'Full-canopy test split contrasting structured cotton rows (93.8% mAP@50) against furrow weeds (76.0% mAP@50).',
+  },
+  {
+    badge: 'Frame Skip 1x–15x',
+    title: 'Speed vs. Temporal Sync',
+    desc: 'Runs inference every Nth frame to multiply throughput up to 15x while scaling Output FPS = Source FPS / N to keep video timing exact.',
+  },
+]
 
 const WORKFLOW_DIAGRAMS = [
   {
@@ -31,7 +121,7 @@ const WORKFLOW_DIAGRAMS = [
         role: 'Boot',
         title: 'Start Flask & Web UI',
         desc: 'Boots the threaded Flask REST backend on port 5000 and serves the frontend workbench.',
-        code: 'localhost:5000 / 3000',
+        code: 'http://localhost:5000',
       },
       {
         step: '04',
@@ -343,8 +433,8 @@ export default function App() {
                 <path d="M21 4H26C27.1046 4 28 4.89543 28 6V11" stroke="#201f20" strokeWidth="2.2" strokeLinecap="round" />
                 <path d="M28 21V26C28 27.1046 27.1046 28 26 28H21" stroke="#201f20" strokeWidth="2.2" strokeLinecap="round" />
                 <path d="M11 28H6C4.89543 28 4 27.1046 4 26V21" stroke="#201f20" strokeWidth="2.2" strokeLinecap="round" />
-                <circle cx="16" cy="16" r="6.5" stroke="#2e5bff" strokeWidth="2" fill="none" />
-                <path d="M16 12V20M12 16H20" stroke="#2e5bff" strokeWidth="1.8" strokeLinecap="round" />
+                <circle cx="16" cy="16" r="6.5" stroke="var(--accent-highlight, #F2765E)" strokeWidth="2" fill="none" />
+                <path d="M16 12V20M12 16H20" stroke="var(--accent-highlight, #F2765E)" strokeWidth="1.8" strokeLinecap="round" />
               </svg>
               <span>CottonVision</span>
             </a>
@@ -486,293 +576,290 @@ export default function App() {
               </div>
             </div>
 
-            {/* Right Column: Browser Frame with Live Inference Workbench */}
-            <div id="workbench" className="browser-frame">
-              {/* Browser Chrome Header */}
-              <div className="browser-chrome">
-                <div className="browser-dots">
-                  <div className="browser-dot" />
-                  <div className="browser-dot" />
-                  <div className="browser-dot" />
-                </div>
-                <div className="browser-address">
-                  localhost:3000 · CottonVision Inference Workbench
-                </div>
-                <div className="browser-status-chip">
-                  GPU Inference · 30 FPS Synchronized
-                </div>
-              </div>
+              {/* Windows-Framed Live Inference Workbench + Controls Guide */}
+              <div className="hero-workbench-stack">
+                <div id="workbench" className="browser-frame">
+                  {/* Native Windows Title & Address Chrome */}
+                  <div className="browser-chrome">
+                    <div className="win-title-group">
+                      <svg className="win-app-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 11V6C4 4.89543 4.89543 4 6 4H11" stroke="#201f20" strokeWidth="2.4" strokeLinecap="round" />
+                        <path d="M21 4H26C27.1046 4 28 4.89543 28 6V11" stroke="#201f20" strokeWidth="2.4" strokeLinecap="round" />
+                        <path d="M28 21V26C28 27.1046 27.1046 28 26 28H21" stroke="#201f20" strokeWidth="2.4" strokeLinecap="round" />
+                        <path d="M11 28H6C4.89543 28 4 27.1046 4 26V21" stroke="#201f20" strokeWidth="2.4" strokeLinecap="round" />
+                        <circle cx="16" cy="16" r="6.5" stroke="#F2765E" strokeWidth="2.2" fill="none" />
+                        <path d="M16 12V20M12 16H20" stroke="#F2765E" strokeWidth="2" strokeLinecap="round" />
+                      </svg>
+                      <span className="win-title-text">CottonVision Inference Workbench</span>
+                    </div>
+                    <div className="browser-address">
+                      <span className="win-address-dot" aria-hidden="true" />
+                      <span>http://localhost:5000</span>
+                    </div>
+                    <div className="win-chrome-right">
+                      <div className="browser-status-chip">
+                        GPU Inference · 30 FPS Synchronized
+                      </div>
+                      <div className="win-controls" aria-hidden="true">
+                        <button type="button" className="win-ctrl-btn" tabIndex={-1} title="Minimize">
+                          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" strokeWidth="1.3" /></svg>
+                        </button>
+                        <button type="button" className="win-ctrl-btn" tabIndex={-1} title="Maximize">
+                          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="2.2" y="2.2" width="7.6" height="7.6" stroke="currentColor" strokeWidth="1.2" /></svg>
+                        </button>
+                        <button type="button" className="win-ctrl-btn win-close" tabIndex={-1} title="Close">
+                          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" strokeWidth="1.3" /></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Workbench Body */}
-              <div className="workbench-body">
-                {/* Toolbar: Frame Skip Controls & Presets */}
-                <div className="workbench-toolbar">
-                  <div className="frame-skip-group">
-                    <span className="frame-skip-label">Frame Skip:</span>
-                    <div className="frame-skip-pills">
-                      {[1, 2, 5, 10, 15].map(v => (
+                  {/* Workbench Body */}
+                  <div className="workbench-body">
+                    {/* Toolbar: Frame Skip Controls & Presets */}
+                    <div className="workbench-toolbar">
+                      <div className="frame-skip-group">
+                        <span className="frame-skip-label">Frame Skip:</span>
+                        <div className="frame-skip-pills">
+                          {[1, 2, 5, 10, 15].map(v => (
+                            <button
+                              key={v}
+                              type="button"
+                              className={`frame-skip-pill ${frameInterval === v ? 'active' : ''}`}
+                              onClick={() => {
+                                setFrameInterval(v)
+                                toast(`Frame skip set to ${v}x (dynamic FPS adjusted)`, 'info')
+                              }}
+                            >
+                              {v}x
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Preset switcher tabs */}
+                      <div className="preset-switcher">
                         <button
-                          key={v}
                           type="button"
-                          className={`frame-skip-pill ${frameInterval === v ? 'active' : ''}`}
+                          className={`preset-tab ${activePreset === 'flight1' && !customOrig ? 'active' : ''}`}
+                          onClick={() => { setActivePreset('flight1'); setCustomOrig(null) }}
+                        >
+                          Flight 1
+                        </button>
+                        <button
+                          type="button"
+                          className={`preset-tab ${activePreset === 'flight2' && !customOrig ? 'active' : ''}`}
+                          onClick={() => { setActivePreset('flight2'); setCustomOrig(null) }}
+                        >
+                          Flight 2
+                        </button>
+                        <button
+                          type="button"
+                          className={`preset-tab ${activePreset === 'flight3' && !customOrig ? 'active' : ''}`}
+                          onClick={() => { setActivePreset('flight3'); setCustomOrig(null) }}
+                        >
+                          Flight 3
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Side-by-side Viewports */}
+                    <div className="workbench-comparison">
+                      {/* Left Pane: Original */}
+                      <div className="workbench-pane">
+                        <div className="workbench-pane-header">
+                          <span className="workbench-pane-title">ORIGINAL UAV STREAM</span>
+                          <span className="workbench-pane-tag">Raw Drone Feed</span>
+                        </div>
+                        <div className="workbench-viewport">
+                          {currentView.isVideo ? (
+                            <video src={currentView.raw} controls playsInline className="workbench-media" />
+                          ) : (
+                            <img src={currentView.raw} alt="Original UAV aerial view" className="workbench-media" />
+                          )}
+                          <div className="workbench-overlay-caption">
+                            <span>4K Flight Footage</span>
+                            <span>Altitude: 18m AGL</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Pane: Annotated Output */}
+                      <div className="workbench-pane">
+                        <div className="workbench-pane-header">
+                          <span className="workbench-pane-title">YOLOv8 + OPENVINO</span>
+                          <span className="workbench-pane-tag tag-accent">AI Overlay</span>
+                        </div>
+                        <div className="workbench-viewport">
+                          {currentView.isVideo ? (
+                            <video src={currentView.annotated} controls playsInline className="workbench-media" />
+                          ) : (
+                            <img src={currentView.annotated} alt="YOLOv8 annotated UAV view" className="workbench-media" />
+                          )}
+                          <div className="workbench-overlay-caption">
+                            <span style={{ color: '#F2765E' }}>■ weed 0.82 · ■ cotton 0.94</span>
+                            <span>{currentView.stats}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Upload Zone Bar */}
+                    <div
+                      className={`workbench-upload-bar ${dragging ? 'dragging' : ''}`}
+                      onDragOver={e => { e.preventDefault(); setDragging(true) }}
+                      onDragLeave={() => setDragging(false)}
+                      onDrop={e => {
+                        e.preventDefault()
+                        setDragging(false)
+                        if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0])
+                      }}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*,video/*"
+                        onChange={e => {
+                          if (e.target.files[0]) handleFile(e.target.files[0])
+                        }}
+                      />
+                      <div className="workbench-upload-info">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-highlight)" strokeWidth="2.2" strokeLinecap="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                        </svg>
+                        <span><strong>Drop drone image, video, or photo</strong> to run live inference</span>
+                      </div>
+                      <div className="workbench-upload-hint">
+                        Supports .mp4, .avi, .jpg, .png (Skip interval: {frameInterval}x)
+                      </div>
+                    </div>
+
+                    {/* Pipeline Progress if running */}
+                    {(uploading || isProcessing) && (
+                      <div className="pipeline-status-box">
+                        <div className="pipeline-status-header">
+                          <span>{jobMsg || (uploading ? 'Uploading payload...' : 'Running YOLOv8 OpenVINO Inference...')}</span>
+                          <span className="tabular-nums">{uploading ? `${uploadProgress}%` : (jobProgress.percent ? `${jobProgress.percent}%` : 'Processing')}</span>
+                        </div>
+                        <div className="pipeline-track">
+                          <div className="pipeline-fill" style={{ width: `${uploading ? uploadProgress : (jobProgress.percent || 45)}%` }} />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Action Export Bar */}
+                    <div className="workbench-footer-bar">
+                      <div className="workbench-export-actions">
+                        <button
+                          type="button"
+                          className="workbench-chip-btn"
                           onClick={() => {
-                            setFrameInterval(v)
-                            toast(`Frame skip set to ${v}x (dynamic FPS adjusted)`, 'info')
+                            toast('Prepared H.264 video download (.mp4)', 'success')
+                            setShowModal(true)
                           }}
                         >
-                          {v}x
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                          </svg>
+                          Download H.264 (.mp4)
                         </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Preset switcher tabs */}
-                  <div className="preset-switcher">
-                    <button
-                      type="button"
-                      className={`preset-tab ${activePreset === 'flight1' && !customOrig ? 'active' : ''}`}
-                      onClick={() => { setActivePreset('flight1'); setCustomOrig(null) }}
-                    >
-                      Flight 1
-                    </button>
-                    <button
-                      type="button"
-                      className={`preset-tab ${activePreset === 'flight2' && !customOrig ? 'active' : ''}`}
-                      onClick={() => { setActivePreset('flight2'); setCustomOrig(null) }}
-                    >
-                      Flight 2
-                    </button>
-                    <button
-                      type="button"
-                      className={`preset-tab ${activePreset === 'flight3' && !customOrig ? 'active' : ''}`}
-                      onClick={() => { setActivePreset('flight3'); setCustomOrig(null) }}
-                    >
-                      Flight 3
-                    </button>
-                  </div>
-                </div>
-
-                {/* Side-by-side Viewports */}
-                <div className="workbench-comparison">
-                  {/* Left Pane: Original */}
-                  <div className="workbench-pane">
-                    <div className="workbench-pane-header">
-                      <span className="workbench-pane-title">ORIGINAL UAV STREAM</span>
-                      <span className="workbench-pane-tag">Raw Drone Feed</span>
-                    </div>
-                    <div className="workbench-viewport">
-                      {currentView.isVideo ? (
-                        <video src={currentView.raw} controls playsInline className="workbench-media" />
-                      ) : (
-                        <img src={currentView.raw} alt="Original UAV aerial view" className="workbench-media" />
-                      )}
-                      <div className="workbench-overlay-caption">
-                        <span>4K Flight Footage</span>
-                        <span>Altitude: 18m AGL</span>
+                        <button
+                          type="button"
+                          className="workbench-chip-btn"
+                          onClick={() => {
+                            toast('Snapshot saved to downloads', 'success')
+                            const link = document.createElement('a')
+                            link.href = currentView.annotated
+                            link.download = 'uav_snapshot.png'
+                            link.click()
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="3" />
+                            <path d="M19 4h-3.2L14 2H10L8.2 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
+                          </svg>
+                          Save Snapshot (.jpg)
+                        </button>
+                        <button
+                          type="button"
+                          className="workbench-chip-btn"
+                          onClick={() => {
+                            toast('YOLO dataset export (.zip) generated', 'success')
+                            setShowModal(true)
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                          </svg>
+                          Export YOLO Labels (.zip)
+                        </button>
                       </div>
+                      <a
+                        href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="workbench-recovery-link"
+                      >
+                        Public UAV Dataset Archive
+                      </a>
                     </div>
                   </div>
+                </div>
 
-                  {/* Right Pane: Annotated Output */}
-                  <div className="workbench-pane">
-                    <div className="workbench-pane-header">
-                      <span className="workbench-pane-title">YOLOv8 + OPENVINO</span>
-                      <span className="workbench-pane-tag tag-accent">AI Overlay</span>
-                    </div>
-                    <div className="workbench-viewport">
-                      {currentView.isVideo ? (
-                        <video src={currentView.annotated} controls playsInline className="workbench-media" />
-                      ) : (
-                        <img src={currentView.annotated} alt="YOLOv8 annotated UAV view" className="workbench-media" />
-                      )}
-                      <div className="workbench-overlay-caption">
-                        <span style={{ color: '#93c5fd' }}>■ weed 0.82 · ■ cotton 0.94</span>
-                        <span>{currentView.stats}</span>
+                {/* Controls & Sample Presets Explanation Below Workbench */}
+                <div className="workbench-guide">
+                  <div className="workbench-guide-header">
+                    <h3 className="workbench-guide-title">Inference Studio Presets &amp; Frame Skip Guide</h3>
+                    <p className="workbench-guide-sub">
+                      Select a preset UAV field pass or tune the temporal sampling interval before uploading video footage.
+                    </p>
+                  </div>
+                  <div className="workbench-guide-grid">
+                    {WORKBENCH_GUIDE_ITEMS.map(item => (
+                      <div key={item.badge} className="workbench-guide-item">
+                        <span className="workbench-guide-badge">{item.badge}</span>
+                        <div className="workbench-guide-label">{item.title}</div>
+                        <p className="workbench-guide-desc">{item.desc}</p>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                </div>
-
-                {/* Upload Zone Bar */}
-                <div
-                  className={`workbench-upload-bar ${dragging ? 'dragging' : ''}`}
-                  onDragOver={e => { e.preventDefault(); setDragging(true) }}
-                  onDragLeave={() => setDragging(false)}
-                  onDrop={e => {
-                    e.preventDefault()
-                    setDragging(false)
-                    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0])
-                  }}
-                >
-                  <input
-                    type="file"
-                    accept="image/*,video/*"
-                    onChange={e => {
-                      if (e.target.files[0]) handleFile(e.target.files[0])
-                    }}
-                  />
-                  <div className="workbench-upload-info">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2e5bff" strokeWidth="2" strokeLinecap="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
-                    </svg>
-                    <span><strong>Drop drone image or video</strong> to run live inference</span>
-                  </div>
-                  <div className="workbench-upload-hint">
-                    Supports .mp4, .avi, .jpg, .png (Skip interval: {frameInterval}x)
-                  </div>
-                </div>
-
-                {/* Pipeline Progress if running */}
-                {(uploading || isProcessing) && (
-                  <div className="pipeline-status-box">
-                    <div className="pipeline-status-header">
-                      <span>{jobMsg || (uploading ? 'Uploading payload...' : 'Running YOLOv8 OpenVINO Inference...')}</span>
-                      <span className="tabular-nums">{uploading ? `${uploadProgress}%` : (jobProgress.percent ? `${jobProgress.percent}%` : 'Processing')}</span>
-                    </div>
-                    <div className="pipeline-track">
-                      <div className="pipeline-fill" style={{ width: `${uploading ? uploadProgress : (jobProgress.percent || 45)}%` }} />
-                    </div>
-                  </div>
-                )}
-
-                {/* Action Export Bar */}
-                <div className="workbench-footer-bar">
-                  <div className="workbench-export-actions">
-                    <button
-                      type="button"
-                      className="workbench-chip-btn"
-                      onClick={() => {
-                        toast('Prepared H.264 video download (.mp4)', 'success')
-                        setShowModal(true)
-                      }}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                      </svg>
-                      Download H.264 (.mp4)
-                    </button>
-                    <button
-                      type="button"
-                      className="workbench-chip-btn"
-                      onClick={() => {
-                        toast('Snapshot saved to downloads', 'success')
-                        const link = document.createElement('a')
-                        link.href = currentView.annotated
-                        link.download = 'uav_snapshot.png'
-                        link.click()
-                      }}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="3" />
-                        <path d="M19 4h-3.2L14 2H10L8.2 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
-                      </svg>
-                      Save Snapshot (.jpg)
-                    </button>
-                    <button
-                      type="button"
-                      className="workbench-chip-btn"
-                      onClick={() => {
-                        toast('YOLO dataset export (.zip) generated', 'success')
-                        setShowModal(true)
-                      }}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                      </svg>
-                      Export YOLO Labels (.zip)
-                    </button>
-                  </div>
-                  <a
-                    href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="workbench-recovery-link"
-                  >
-                    Public UAV Dataset Archive
-                  </a>
                 </div>
               </div>
-            </div>
           </div>
         </div>
       </section>
 
       {/* ====================================================================
-          3. LOGO CLOUD (saas-3, variation: row, 6 marks under caption)
+          3. LOGO CLOUD (Official Framework Links)
           ==================================================================== */}
       <section className="band logos-band" aria-label="Supported Frameworks">
         <div className="container">
           <div className="logos-caption">
-            Integrated with Leading CV and Edge Hardware Frameworks
+            Integrate with the leading CV and AI frameworks
           </div>
           <div className="logos-row">
-            {/* 1. Ultralytics YOLOv8 */}
-            <div className="logo-item">
-              <svg className="logo-mark-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <rect x="3" y="3" width="18" height="18" rx="3" />
-                <path d="M7 12l3 3 7-7" />
-              </svg>
-              <span className="logo-name">YOLOv8</span>
-            </div>
-
-            {/* 2. Intel OpenVINO */}
-            <div className="logo-item">
-              <svg className="logo-mark-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M8 12h8M12 8v8" />
-              </svg>
-              <span className="logo-name">OpenVINO</span>
-            </div>
-
-            {/* 3. PyTorch */}
-            <div className="logo-item">
-              <svg className="logo-mark-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <path d="M14 4l-4 4-2-2 6-6 4 4zM8 16l-4 4 6 2 2-6z" />
-                <circle cx="15" cy="9" r="1.5" />
-              </svg>
-              <span className="logo-name">PyTorch</span>
-            </div>
-
-            {/* 4. OpenCV */}
-            <div className="logo-item">
-              <svg className="logo-mark-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <circle cx="9" cy="8" r="4" />
-                <circle cx="15" cy="8" r="4" />
-                <circle cx="12" cy="15" r="4" />
-              </svg>
-              <span className="logo-name">OpenCV</span>
-            </div>
-
-            {/* 5. DJI Enterprise */}
-            <div className="logo-item">
-              <svg className="logo-mark-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-              <span className="logo-name">DJI Enterprise</span>
-            </div>
-
-            {/* 6. Docker */}
-            <div className="logo-item">
-              <svg className="logo-mark-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <path d="M4 19c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2c0-3-2-6-7-6-1 0-2 .2-3 .6A4.5 4.5 0 0 0 4 19z" />
-                <rect x="7" y="9" width="3" height="3" />
-                <rect x="11" y="9" width="3" height="3" />
-                <rect x="15" y="9" width="3" height="3" />
-                <rect x="11" y="5" width="3" height="3" />
-              </svg>
-              <span className="logo-name">Docker</span>
-            </div>
+            {FRAMEWORK_LINKS.map(fw => (
+              <a
+                key={fw.name}
+                href={fw.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="logo-item"
+              >
+                {fw.icon}
+                <span className="logo-name">{fw.name}</span>
+              </a>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ====================================================================
-          4. FEATURES (saas-4, variation: alternating, 3 rows)
+          4. FEATURES (Engineering / Agriculture, centered)
           ==================================================================== */}
       <section id="features" className="band features-band">
         <div className="container">
           <div className="section-header">
-            <span className="section-kicker">Core Pipeline</span>
+            <span className="section-kicker">Engineering / Agriculture</span>
             <h2 className="section-title">Engineered for Agricultural Drone Cinematography</h2>
             <p className="section-subtitle">
               Every stage of the CottonVision pipeline is built to handle the unique geometry of aerial crop rows, high flight velocities, and changing ambient field light.
@@ -812,10 +899,10 @@ export default function App() {
                     <rect x="30" y="100" width="120" height="80" rx="8" fill="#ffffff" stroke="#e0e0df" strokeWidth="1.5" />
                     <text x="90" y="135" textAnchor="middle" fill="#201f20" fontSize="13" fontWeight="500" fontFamily="sans-serif">UAV Flight Feed</text>
                     <text x="90" y="155" textAnchor="middle" fill="#606060" fontSize="11" fontFamily="sans-serif">4K Drone Capture</text>
-                    
+
                     {/* Routing Arrows */}
-                    <path d="M150 120 L210 80" stroke="#2e5bff" strokeWidth="2" strokeDasharray="4 4" />
-                    <path d="M150 160 L210 200" stroke="#2e5bff" strokeWidth="2" strokeDasharray="4 4" />
+                    <path d="M150 120 L210 80" stroke="var(--accent-highlight)" strokeWidth="2" strokeDasharray="4 4" />
+                    <path d="M150 160 L210 200" stroke="var(--accent-highlight)" strokeWidth="2" strokeDasharray="4 4" />
 
                     {/* Dual Path Blocks */}
                     <rect x="210" y="50" width="160" height="60" rx="8" fill="#ffffff" stroke="#e0e0df" strokeWidth="1.5" />
@@ -824,15 +911,15 @@ export default function App() {
 
                     <rect x="210" y="170" width="160" height="60" rx="8" fill="#ffffff" stroke="#e0e0df" strokeWidth="1.5" />
                     <text x="290" y="198" textAnchor="middle" fill="#201f20" fontSize="12" fontWeight="500" fontFamily="sans-serif">Threaded Video Pipeline</text>
-                    <text x="290" y="216" textAnchor="middle" fill="#2e5bff" fontSize="11" fontFamily="sans-serif">Frame Interval Skip (1x–15x)</text>
+                    <text x="290" y="216" textAnchor="middle" fill="var(--accent-highlight)" fontSize="11" fontFamily="sans-serif">Frame Interval Skip (1x–15x)</text>
 
                     {/* Merge to Output */}
                     <path d="M370 80 L420 120" stroke="#201f20" strokeWidth="1.5" />
                     <path d="M370 200 L420 160" stroke="#201f20" strokeWidth="1.5" />
 
-                    <rect x="420" y="100" width="90" height="80" rx="8" fill="#ffffff" stroke="#2e5bff" strokeWidth="2" />
+                    <rect x="420" y="100" width="90" height="80" rx="8" fill="#ffffff" stroke="var(--accent-highlight)" strokeWidth="2" />
                     <text x="465" y="135" textAnchor="middle" fill="#201f20" fontSize="12" fontWeight="600" fontFamily="sans-serif">Output</text>
-                    <text x="465" y="155" textAnchor="middle" fill="#2e5bff" fontSize="11" fontFamily="sans-serif">H.264 + YOLO</text>
+                    <text x="465" y="155" textAnchor="middle" fill="var(--accent-highlight)" fontSize="11" fontFamily="sans-serif">H.264 + YOLO</text>
                   </svg>
                 </div>
                 <div className="illustration-caption-bar">
@@ -874,20 +961,20 @@ export default function App() {
                     <text x="40" y="45" fill="#201f20" fontSize="12" fontWeight="600" fontFamily="sans-serif">Raw Flight: 30 FPS Source Stream</text>
                     {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((f, i) => (
                       <g key={i}>
-                        <rect x={40 + i * 46} y={60} width="36" height="42" rx="4" fill={i % 5 === 0 ? "#2e5bff" : "#ffffff"} stroke="#e0e0df" strokeWidth="1" />
-                        <text x={58 + i * 46} y={85} textAnchor="middle" fill={i % 5 === 0 ? "#fcfcfd" : "#606060"} fontSize="11" fontFamily="sans-serif">F{i+1}</text>
+                        <rect x={40 + i * 46} y={60} width="36" height="42" rx="4" fill={i % 5 === 0 ? "var(--accent-highlight)" : "#ffffff"} stroke="#e0e0df" strokeWidth="1" />
+                        <text x={58 + i * 46} y={85} textAnchor="middle" fill={i % 5 === 0 ? "#141314" : "#606060"} fontSize="11" fontWeight={i % 5 === 0 ? "600" : "400"} fontFamily="sans-serif">F{i+1}</text>
                       </g>
                     ))}
 
                     {/* Downsample Arrow */}
-                    <path d="M270 120 L270 155" stroke="#2e5bff" strokeWidth="2" strokeDasharray="3 3" />
-                    <text x="285" y="142" fill="#2e5bff" fontSize="11" fontWeight="500" fontFamily="sans-serif">5× Frame Skip Interval</text>
+                    <path d="M270 120 L270 155" stroke="var(--accent-highlight)" strokeWidth="2" strokeDasharray="3 3" />
+                    <text x="285" y="142" fill="var(--accent-highlight)" fontSize="11" fontWeight="600" fontFamily="sans-serif">5× Frame Skip Interval</text>
 
                     {/* Synchronized Output Stream */}
                     <text x="40" y="180" fill="#201f20" fontSize="12" fontWeight="600" fontFamily="sans-serif">Reconstructed Output: 6 FPS Temporal Sync (H.264)</text>
                     {[0, 1].map((f, i) => (
                       <g key={i}>
-                        <rect x={40 + i * 230} y={195} width="220" height="48" rx="6" fill="#ffffff" stroke="#2e5bff" strokeWidth="1.5" />
+                        <rect x={40 + i * 230} y={195} width="220" height="48" rx="6" fill="#ffffff" stroke="var(--accent-highlight)" strokeWidth="1.5" />
                         <text x={150 + i * 230} y={224} textAnchor="middle" fill="#201f20" fontSize="12" fontWeight="500" fontFamily="sans-serif">
                           Annotated Keyframe {i * 5 + 1} (Hold: 166ms)
                         </text>
@@ -933,7 +1020,7 @@ export default function App() {
                     {/* ZIP Container */}
                     <rect x="40" y="40" width="460" height="200" rx="8" fill="#ffffff" stroke="#e0e0df" strokeWidth="1.5" />
                     <text x="65" y="70" fill="#201f20" fontSize="13" fontWeight="600" fontFamily="sans-serif">dataset_20260324.zip (Structured Output)</text>
-                    
+
                     {/* Images Column */}
                     <rect x="65" y="90" width="190" height="120" rx="6" fill="#f7f6f6" stroke="#e0e0df" strokeWidth="1" />
                     <text x="80" y="115" fill="#201f20" fontSize="12" fontWeight="500" fontFamily="sans-serif">images/</text>
@@ -944,8 +1031,8 @@ export default function App() {
                     {/* Labels Column */}
                     <rect x="285" y="90" width="190" height="120" rx="6" fill="#f7f6f6" stroke="#e0e0df" strokeWidth="1" />
                     <text x="300" y="115" fill="#201f20" fontSize="12" fontWeight="500" fontFamily="sans-serif">labels/</text>
-                    <text x="315" y="140" fill="#2e5bff" fontSize="11" fontFamily="monospace">1 0.452 0.321 0.08 0.06</text>
-                    <text x="315" y="160" fill="#2e5bff" fontSize="11" fontFamily="monospace">1 0.781 0.654 0.12 0.09</text>
+                    <text x="315" y="140" fill="var(--accent-highlight)" fontSize="11" fontFamily="monospace">1 0.452 0.321 0.08 0.06</text>
+                    <text x="315" y="160" fill="var(--accent-highlight)" fontSize="11" fontFamily="monospace">1 0.781 0.654 0.12 0.09</text>
                     <text x="315" y="180" fill="#0891b2" fontSize="11" fontFamily="monospace">0 0.214 0.441 0.22 0.18</text>
                   </svg>
                 </div>
@@ -965,7 +1052,7 @@ export default function App() {
       <section id="workflow" className="band workflow-band">
         <div className="container">
           <div className="section-header">
-            <span className="section-kicker">Deployment &amp; Inference Workflow</span>
+            <span className="section-kicker">Deployment</span>
             <h2 className="section-title">End-to-End Arrow Architecture</h2>
             <p className="section-subtitle">
               Visual stage-by-stage execution flow from single-command local launch to YOLOv8n detection and normalized dataset packaging.
@@ -987,7 +1074,7 @@ export default function App() {
         <div className="container">
           <div className="section-header">
             <span className="section-kicker">Academic Research</span>
-            <h2 className="section-title">Directed Studies at University of the Fraser Valley</h2>
+            <h2 className="section-title">Directed Studies at the University of the Fraser Valley</h2>
             <p className="section-subtitle">
               Computer vision research and engineering conducted by Manbir Singh Sidhu under the supervision and guidance of Professor Omer Waqar at the University of the Fraser Valley (UFV).
             </p>
@@ -1070,6 +1157,12 @@ export default function App() {
             <div className="faq-list">
               {[
                 {
+                  q: 'Where can I download a sample drone .mp4 video for quick testing?',
+                  a: 'You can download a sample cotton-field UAV test video directly from Google Drive and drop it into the Inference Studio upload box above to benchmark frame skipping and YOLOv8 overlay reconstruction right away:',
+                  linkHref: SAMPLE_MP4_DRIVE_URL,
+                  linkLabel: 'Download Sample Drone Test Video (.mp4)'
+                },
+                {
                   q: 'How does CottonVision distinguish weed clusters from cotton plants?',
                   a: 'Our custom YOLOv8 model was trained on thousands of annotated high-resolution UAV aerial images captured under diverse sunlight and growth stages. Cotton plants exhibit distinct geometric leaf patterns and structured inter-row spacing, whereas invasive weeds emerge randomly in furrows with irregular canopy margins. The model scores 93.8% mAP@50 for cotton and 76.0% mAP@50 for weeds.'
                 },
@@ -1109,6 +1202,18 @@ export default function App() {
                   {openFaqs[idx] && (
                     <div className="faq-answer">
                       {faq.a}
+                      {faq.linkHref && (
+                        <div style={{ marginTop: '10px' }}>
+                          <a
+                            href={faq.linkHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="faq-inline-link"
+                          >
+                            {faq.linkLabel}
+                          </a>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1171,8 +1276,8 @@ export default function App() {
                   <path d="M21 4H26C27.1046 4 28 4.89543 28 6V11" stroke="#201f20" strokeWidth="2.2" strokeLinecap="round" />
                   <path d="M28 21V26C28 27.1046 27.1046 28 26 28H21" stroke="#201f20" strokeWidth="2.2" strokeLinecap="round" />
                   <path d="M11 28H6C4.89543 28 4 27.1046 4 26V21" stroke="#201f20" strokeWidth="2.2" strokeLinecap="round" />
-                  <circle cx="16" cy="16" r="6.5" stroke="#2e5bff" strokeWidth="2" fill="none" />
-                  <path d="M16 12V20M12 16H20" stroke="#2e5bff" strokeWidth="1.8" strokeLinecap="round" />
+                  <circle cx="16" cy="16" r="6.5" stroke="var(--accent-highlight, #F2765E)" strokeWidth="2" fill="none" />
+                  <path d="M16 12V20M12 16H20" stroke="var(--accent-highlight, #F2765E)" strokeWidth="1.8" strokeLinecap="round" />
                 </svg>
                 <span>CottonVision</span>
               </a>
