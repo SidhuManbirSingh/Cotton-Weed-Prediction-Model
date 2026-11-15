@@ -270,7 +270,11 @@ export default function App() {
   const [customOrig, setCustomOrig] = useState(null)
   const [customAnnotated, setCustomAnnotated] = useState(null)
   const [customIsVideo, setCustomIsVideo] = useState(false)
+  const [customFileName, setCustomFileName] = useState('')
   const [customLabelUrl, setCustomLabelUrl] = useState(null)
+  const [customLabelsZipUrl, setCustomLabelsZipUrl] = useState(null)
+  const [customSummary, setCustomSummary] = useState(null)
+  const [inferenceError, setInferenceError] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [jobStatus, setJobStatus] = useState(null)
   const [jobMsg, setJobMsg] = useState('')
@@ -292,37 +296,69 @@ export default function App() {
   // Pre-loaded flight presets
   const presets = {
     flight1: {
-      name: 'Flight 01: Low Altitude Weed Cluster',
+      name: 'Flight 1 — Low-Altitude Weed Cluster (18m AGL)',
       raw: '/samples/uav_raw_field.png',
       annotated: '/samples/uav_annotated_field.png',
-      summary: 'Raw Orthomosaic vs YOLOv8 Weed Isolation',
-      stats: '14 weeds detected · 0 cotton damaged · Conf 0.82',
+      description: '4K aerial field pass isolating sparse inter-row weeds with zero false-positive cotton damage.',
+      legendWeed: 'weed 0.82',
+      legendCotton: 'cotton 0.94',
+      stats: '14 weeds detected · 0 cotton damaged · Preset Demo',
       isVideo: false
     },
     flight2: {
-      name: 'Flight 02: Dense Soil Boundary',
+      name: 'Flight 2 — Dense Soil Boundary (15m AGL)',
       raw: '/samples/uav_raw_field.png',
       annotated: '/samples/weed_cluster_08.jpg',
-      summary: 'Inter-row Weed Emergence at 15m AGL',
-      stats: '22 weeds detected · Multi-box clustering',
+      description: 'Sample pass demonstrating overlapping furrow weed emergence with dense multi-box detections.',
+      legendWeed: 'weed 0.78',
+      legendCotton: 'cotton 0.91',
+      stats: '22 weeds detected · Multi-box clustering · Preset Demo',
       isVideo: false
     },
     flight3: {
-      name: 'Flight 03: Validation Batch Rows',
+      name: 'Flight 3 — Validation Batch Rows',
       raw: '/samples/cotton_row_tile.jpg',
       annotated: '/samples/cotton_rows_val.jpg',
-      summary: 'Full Canopy Segmentation (Cotton vs Weed)',
-      stats: 'Cotton mAP 93.8% · Weed mAP 76.0%',
+      description: 'Full-canopy test split contrasting structured cotton rows (93.8% mAP@50) against furrow weeds (76.0%).',
+      legendWeed: 'weed 0.76',
+      legendCotton: 'cotton 0.94',
+      stats: 'Cotton mAP 93.8% · Weed mAP 76.0% · Preset Demo',
       isVideo: false
     }
   }
 
+  const formatSummaryStats = (summary) => {
+    if (!summary) return ''
+    const total = summary.total_detections ?? 0
+    const msText = summary.inference_ms ? ` · ${summary.inference_ms}ms` : ''
+    const devText = summary.device ? ` (${summary.device})` : ''
+    return `${total} detection${total === 1 ? '' : 's'}${msText}${devText}`
+  }
+
   const currentView = customOrig ? {
-    name: 'Custom User Upload',
+    name: customFileName ? `Custom Inference — ${customFileName}` : 'Custom User Upload',
     raw: customOrig,
     annotated: customAnnotated || customOrig,
-    summary: customAnnotated ? 'AI Inference Complete' : 'Awaiting Inference Processing',
-    stats: isProcessing ? 'GPU Inference in Progress...' : 'Active Media Buffer',
+    description: inferenceError
+      ? `Inference error: ${inferenceError}`
+      : (isProcessing
+          ? (jobMsg || 'Running YOLOv8 detection model on your uploaded file...')
+          : (customAnnotated ? 'Live YOLOv8 detection completed on your uploaded file.' : 'Preparing upload...')),
+    legendWeed: inferenceError
+      ? 'inference failed'
+      : (isProcessing
+          ? 'running model...'
+          : (customSummary ? `weed: ${customSummary.weed_count ?? 0}${customSummary.weed_conf != null ? ` (${customSummary.weed_conf.toFixed(2)})` : ''}` : 'weed: 0')),
+    legendCotton: inferenceError
+      ? 'check logs'
+      : (isProcessing
+          ? 'YOLOv8'
+          : (customSummary ? `cotton: ${customSummary.cotton_count ?? 0}${customSummary.cotton_conf != null ? ` (${customSummary.cotton_conf.toFixed(2)})` : ''}` : 'cotton: 0')),
+    stats: inferenceError
+      ? inferenceError
+      : (isProcessing
+          ? 'Running YOLOv8 detection...'
+          : (customSummary ? formatSummaryStats(customSummary) : (customFileName || 'Active Media Buffer'))),
     isVideo: customIsVideo
   } : presets[activePreset]
 
@@ -340,7 +376,11 @@ export default function App() {
     setCustomOrig(URL.createObjectURL(file))
     setCustomAnnotated(null)
     setCustomIsVideo(isVideo)
+    setCustomFileName(file.name)
     setCustomLabelUrl(null)
+    setCustomLabelsZipUrl(null)
+    setCustomSummary(null)
+    setInferenceError('')
     setUploading(true)
     setUploadProgress(15)
 
@@ -349,23 +389,30 @@ export default function App() {
 
     try {
       const res = await fetch(`${API}/api/upload`, { method: 'POST', body: fd })
-      if (!res.ok) throw new Error('Upload endpoint rejected file')
       const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Upload endpoint rejected file')
       setUploadProgress(100)
-      toast(`Uploaded ${data.filename} successfully`, 'success')
+      toast(`Uploaded ${data.filename} — running YOLOv8 inference`, 'info')
 
       if (data.type === 'image') {
         setIsProcessing(true)
+        setJobMsg(`Running YOLOv8 inference on ${data.filename}...`)
         const imgRes = await fetch(`${API}/api/process-image`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ filename: data.filename }),
         })
         const imgData = await imgRes.json()
+        if (!imgRes.ok || imgData.error) {
+          throw new Error(imgData.error || 'Image inference failed')
+        }
         setCustomAnnotated(`${API}${imgData.annotated_url}`)
         setCustomLabelUrl(`${API}${imgData.label_url}`)
+        if (imgData.labels_zip_url) setCustomLabelsZipUrl(`${API}${imgData.labels_zip_url}`)
+        setCustomSummary(imgData.summary || null)
         setIsProcessing(false)
-        toast('YOLOv8 image inference complete!', 'success')
+        setJobMsg('')
+        toast(`YOLOv8 complete: ${imgData.summary?.total_detections ?? 0} detections`, 'success')
       } else {
         setIsProcessing(true)
         const vidRes = await fetch(`${API}/api/process`, {
@@ -374,8 +421,11 @@ export default function App() {
           body: JSON.stringify({ filename: data.filename, frame_interval: frameInterval }),
         })
         const vidData = await vidRes.json()
+        if (!vidRes.ok || vidData.error) {
+          throw new Error(vidData.error || 'Video pipeline failed to start')
+        }
         setJobStatus('queued')
-        setJobMsg('Flight video queued for GPU processing...')
+        setJobMsg('Flight video queued for YOLOv8 processing...')
 
         // Poll job
         if (pollRef.current) clearInterval(pollRef.current)
@@ -391,20 +441,22 @@ export default function App() {
               clearInterval(pollRef.current)
               setIsProcessing(false)
               setCustomAnnotated(`${API}${stData.result.output_video_url}`)
+              setCustomSummary(stData.result.summary || null)
               setJobResult(stData.result)
               setShowModal(true)
               toast('Video pipeline complete! H.264 stream ready.', 'success')
             } else if (stData.status === 'error') {
               clearInterval(pollRef.current)
               setIsProcessing(false)
+              setInferenceError(stData.message || 'Video processing error')
               toast(`Processing error: ${stData.message}`, 'error')
             }
           } catch (_) {}
         }, 1200)
       }
     } catch (err) {
-      toast('Operating in offline sample mode (mock result displayed).', 'info')
-      setCustomAnnotated(presets.flight1.annotated)
+      setInferenceError(err.message || 'Inference request failed')
+      toast(`Inference failed: ${err.message}`, 'error')
       setIsProcessing(false)
     } finally {
       setUploading(false)
@@ -433,8 +485,8 @@ export default function App() {
                 <path d="M21 4H26C27.1046 4 28 4.89543 28 6V11" stroke="#201f20" strokeWidth="2.2" strokeLinecap="round" />
                 <path d="M28 21V26C28 27.1046 27.1046 28 26 28H21" stroke="#201f20" strokeWidth="2.2" strokeLinecap="round" />
                 <path d="M11 28H6C4.89543 28 4 27.1046 4 26V21" stroke="#201f20" strokeWidth="2.2" strokeLinecap="round" />
-                <circle cx="16" cy="16" r="6.5" stroke="var(--accent-highlight, #F2765E)" strokeWidth="2" fill="none" />
-                <path d="M16 12V20M12 16H20" stroke="var(--accent-highlight, #F2765E)" strokeWidth="1.8" strokeLinecap="round" />
+                <circle cx="16" cy="16" r="6.5" stroke="var(--accent, #2e5bff)" strokeWidth="2" fill="none" />
+                <path d="M16 12V20M12 16H20" stroke="var(--accent, #2e5bff)" strokeWidth="1.8" strokeLinecap="round" />
               </svg>
               <span>CottonVision</span>
             </a>
@@ -587,8 +639,8 @@ export default function App() {
                         <path d="M21 4H26C27.1046 4 28 4.89543 28 6V11" stroke="#201f20" strokeWidth="2.4" strokeLinecap="round" />
                         <path d="M28 21V26C28 27.1046 27.1046 28 26 28H21" stroke="#201f20" strokeWidth="2.4" strokeLinecap="round" />
                         <path d="M11 28H6C4.89543 28 4 27.1046 4 26V21" stroke="#201f20" strokeWidth="2.4" strokeLinecap="round" />
-                        <circle cx="16" cy="16" r="6.5" stroke="#F2765E" strokeWidth="2.2" fill="none" />
-                        <path d="M16 12V20M12 16H20" stroke="#F2765E" strokeWidth="2" strokeLinecap="round" />
+                        <circle cx="16" cy="16" r="6.5" stroke="#2e5bff" strokeWidth="2.2" fill="none" />
+                        <path d="M16 12V20M12 16H20" stroke="#2e5bff" strokeWidth="2" strokeLinecap="round" />
                       </svg>
                       <span className="win-title-text">CottonVision Inference Workbench</span>
                     </div>
@@ -642,25 +694,30 @@ export default function App() {
                         <button
                           type="button"
                           className={`preset-tab ${activePreset === 'flight1' && !customOrig ? 'active' : ''}`}
-                          onClick={() => { setActivePreset('flight1'); setCustomOrig(null) }}
+                          onClick={() => { setActivePreset('flight1'); setCustomOrig(null); setCustomSummary(null); setInferenceError('') }}
                         >
                           Flight 1
                         </button>
                         <button
                           type="button"
                           className={`preset-tab ${activePreset === 'flight2' && !customOrig ? 'active' : ''}`}
-                          onClick={() => { setActivePreset('flight2'); setCustomOrig(null) }}
+                          onClick={() => { setActivePreset('flight2'); setCustomOrig(null); setCustomSummary(null); setInferenceError('') }}
                         >
                           Flight 2
                         </button>
                         <button
                           type="button"
                           className={`preset-tab ${activePreset === 'flight3' && !customOrig ? 'active' : ''}`}
-                          onClick={() => { setActivePreset('flight3'); setCustomOrig(null) }}
+                          onClick={() => { setActivePreset('flight3'); setCustomOrig(null); setCustomSummary(null); setInferenceError('') }}
                         >
                           Flight 3
                         </button>
                       </div>
+                    </div>
+
+                    {/* Active Preset / Custom Run Info Strip */}
+                    <div className="workbench-preset-strip">
+                      <span><strong>{currentView.name}:</strong> {currentView.description}</span>
                     </div>
 
                     {/* Side-by-side Viewports */}
@@ -678,8 +735,8 @@ export default function App() {
                             <img src={currentView.raw} alt="Original UAV aerial view" className="workbench-media" />
                           )}
                           <div className="workbench-overlay-caption">
-                            <span>4K Flight Footage</span>
-                            <span>Altitude: 18m AGL</span>
+                            <span>{customOrig ? 'Uploaded Media' : '4K Flight Footage'}</span>
+                            <span>{customOrig ? (customFileName || 'User File') : 'Altitude: 18m AGL'}</span>
                           </div>
                         </div>
                       </div>
@@ -687,7 +744,7 @@ export default function App() {
                       {/* Right Pane: Annotated Output */}
                       <div className="workbench-pane">
                         <div className="workbench-pane-header">
-                          <span className="workbench-pane-title">YOLOv8 + OPENVINO</span>
+                          <span className="workbench-pane-title">YOLOv8 Inference</span>
                           <span className="workbench-pane-tag tag-accent">AI Overlay</span>
                         </div>
                         <div className="workbench-viewport">
@@ -697,7 +754,11 @@ export default function App() {
                             <img src={currentView.annotated} alt="YOLOv8 annotated UAV view" className="workbench-media" />
                           )}
                           <div className="workbench-overlay-caption">
-                            <span style={{ color: '#F2765E' }}>■ weed 0.82 · ■ cotton 0.94</span>
+                            <span>
+                              <span style={{ color: '#F2765E' }}>■ {currentView.legendWeed}</span>
+                              {' · '}
+                              <span style={{ color: '#60a5fa' }}>■ {currentView.legendCotton}</span>
+                            </span>
                             <span>{currentView.stats}</span>
                           </div>
                         </div>
@@ -737,7 +798,7 @@ export default function App() {
                     {(uploading || isProcessing) && (
                       <div className="pipeline-status-box">
                         <div className="pipeline-status-header">
-                          <span>{jobMsg || (uploading ? 'Uploading payload...' : 'Running YOLOv8 OpenVINO Inference...')}</span>
+                          <span>{jobMsg || (uploading ? 'Uploading payload...' : 'Running YOLOv8 Inference...')}</span>
                           <span className="tabular-nums">{uploading ? `${uploadProgress}%` : (jobProgress.percent ? `${jobProgress.percent}%` : 'Processing')}</span>
                         </div>
                         <div className="pipeline-track">
@@ -768,8 +829,8 @@ export default function App() {
                           onClick={() => {
                             toast('Snapshot saved to downloads', 'success')
                             const link = document.createElement('a')
-                            link.href = currentView.annotated
-                            link.download = 'uav_snapshot.png'
+                            link.href = jobResult?.snapshot_url ? `${API}${jobResult.snapshot_url}` : currentView.annotated
+                            link.download = 'uav_snapshot.jpg'
                             link.click()
                           }}
                         >
@@ -783,8 +844,16 @@ export default function App() {
                           type="button"
                           className="workbench-chip-btn"
                           onClick={() => {
-                            toast('YOLO dataset export (.zip) generated', 'success')
-                            setShowModal(true)
+                            if (customLabelsZipUrl) {
+                              window.location.href = customLabelsZipUrl
+                              toast('Downloading YOLO labels ZIP for uploaded image', 'success')
+                            } else if (jobResult?.labels_url) {
+                              window.location.href = `${API}${jobResult.labels_url}`
+                              toast('Downloading YOLO dataset archive (.zip)', 'success')
+                            } else {
+                              toast('YOLO dataset export (.zip) ready', 'success')
+                              setShowModal(true)
+                            }
                           }}
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -901,8 +970,8 @@ export default function App() {
                     <text x="90" y="155" textAnchor="middle" fill="#606060" fontSize="11" fontFamily="sans-serif">4K Drone Capture</text>
 
                     {/* Routing Arrows */}
-                    <path d="M150 120 L210 80" stroke="var(--accent-highlight)" strokeWidth="2" strokeDasharray="4 4" />
-                    <path d="M150 160 L210 200" stroke="var(--accent-highlight)" strokeWidth="2" strokeDasharray="4 4" />
+                    <path d="M150 120 L210 80" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 4" />
+                    <path d="M150 160 L210 200" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 4" />
 
                     {/* Dual Path Blocks */}
                     <rect x="210" y="50" width="160" height="60" rx="8" fill="#ffffff" stroke="#e0e0df" strokeWidth="1.5" />
@@ -911,15 +980,15 @@ export default function App() {
 
                     <rect x="210" y="170" width="160" height="60" rx="8" fill="#ffffff" stroke="#e0e0df" strokeWidth="1.5" />
                     <text x="290" y="198" textAnchor="middle" fill="#201f20" fontSize="12" fontWeight="500" fontFamily="sans-serif">Threaded Video Pipeline</text>
-                    <text x="290" y="216" textAnchor="middle" fill="var(--accent-highlight)" fontSize="11" fontFamily="sans-serif">Frame Interval Skip (1x–15x)</text>
+                    <text x="290" y="216" textAnchor="middle" fill="var(--accent)" fontSize="11" fontFamily="sans-serif">Frame Interval Skip (1x–15x)</text>
 
                     {/* Merge to Output */}
                     <path d="M370 80 L420 120" stroke="#201f20" strokeWidth="1.5" />
                     <path d="M370 200 L420 160" stroke="#201f20" strokeWidth="1.5" />
 
-                    <rect x="420" y="100" width="90" height="80" rx="8" fill="#ffffff" stroke="var(--accent-highlight)" strokeWidth="2" />
+                    <rect x="420" y="100" width="90" height="80" rx="8" fill="#ffffff" stroke="var(--accent)" strokeWidth="2" />
                     <text x="465" y="135" textAnchor="middle" fill="#201f20" fontSize="12" fontWeight="600" fontFamily="sans-serif">Output</text>
-                    <text x="465" y="155" textAnchor="middle" fill="var(--accent-highlight)" fontSize="11" fontFamily="sans-serif">H.264 + YOLO</text>
+                    <text x="465" y="155" textAnchor="middle" fill="var(--accent)" fontSize="11" fontFamily="sans-serif">H.264 + YOLO</text>
                   </svg>
                 </div>
                 <div className="illustration-caption-bar">
@@ -961,20 +1030,20 @@ export default function App() {
                     <text x="40" y="45" fill="#201f20" fontSize="12" fontWeight="600" fontFamily="sans-serif">Raw Flight: 30 FPS Source Stream</text>
                     {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((f, i) => (
                       <g key={i}>
-                        <rect x={40 + i * 46} y={60} width="36" height="42" rx="4" fill={i % 5 === 0 ? "var(--accent-highlight)" : "#ffffff"} stroke="#e0e0df" strokeWidth="1" />
-                        <text x={58 + i * 46} y={85} textAnchor="middle" fill={i % 5 === 0 ? "#141314" : "#606060"} fontSize="11" fontWeight={i % 5 === 0 ? "600" : "400"} fontFamily="sans-serif">F{i+1}</text>
+                        <rect x={40 + i * 46} y={60} width="36" height="42" rx="4" fill={i % 5 === 0 ? "var(--accent)" : "#ffffff"} stroke="#e0e0df" strokeWidth="1" />
+                        <text x={58 + i * 46} y={85} textAnchor="middle" fill={i % 5 === 0 ? "#fcfcfd" : "#606060"} fontSize="11" fontWeight={i % 5 === 0 ? "600" : "400"} fontFamily="sans-serif">F{i+1}</text>
                       </g>
                     ))}
 
                     {/* Downsample Arrow */}
-                    <path d="M270 120 L270 155" stroke="var(--accent-highlight)" strokeWidth="2" strokeDasharray="3 3" />
-                    <text x="285" y="142" fill="var(--accent-highlight)" fontSize="11" fontWeight="600" fontFamily="sans-serif">5× Frame Skip Interval</text>
+                    <path d="M270 120 L270 155" stroke="var(--accent)" strokeWidth="2" strokeDasharray="3 3" />
+                    <text x="285" y="142" fill="var(--accent)" fontSize="11" fontWeight="600" fontFamily="sans-serif">5× Frame Skip Interval</text>
 
                     {/* Synchronized Output Stream */}
                     <text x="40" y="180" fill="#201f20" fontSize="12" fontWeight="600" fontFamily="sans-serif">Reconstructed Output: 6 FPS Temporal Sync (H.264)</text>
                     {[0, 1].map((f, i) => (
                       <g key={i}>
-                        <rect x={40 + i * 230} y={195} width="220" height="48" rx="6" fill="#ffffff" stroke="var(--accent-highlight)" strokeWidth="1.5" />
+                        <rect x={40 + i * 230} y={195} width="220" height="48" rx="6" fill="#ffffff" stroke="var(--accent)" strokeWidth="1.5" />
                         <text x={150 + i * 230} y={224} textAnchor="middle" fill="#201f20" fontSize="12" fontWeight="500" fontFamily="sans-serif">
                           Annotated Keyframe {i * 5 + 1} (Hold: 166ms)
                         </text>
@@ -1031,8 +1100,8 @@ export default function App() {
                     {/* Labels Column */}
                     <rect x="285" y="90" width="190" height="120" rx="6" fill="#f7f6f6" stroke="#e0e0df" strokeWidth="1" />
                     <text x="300" y="115" fill="#201f20" fontSize="12" fontWeight="500" fontFamily="sans-serif">labels/</text>
-                    <text x="315" y="140" fill="var(--accent-highlight)" fontSize="11" fontFamily="monospace">1 0.452 0.321 0.08 0.06</text>
-                    <text x="315" y="160" fill="var(--accent-highlight)" fontSize="11" fontFamily="monospace">1 0.781 0.654 0.12 0.09</text>
+                    <text x="315" y="140" fill="var(--accent)" fontSize="11" fontFamily="monospace">1 0.452 0.321 0.08 0.06</text>
+                    <text x="315" y="160" fill="var(--accent)" fontSize="11" fontFamily="monospace">1 0.781 0.654 0.12 0.09</text>
                     <text x="315" y="180" fill="#0891b2" fontSize="11" fontFamily="monospace">0 0.214 0.441 0.22 0.18</text>
                   </svg>
                 </div>
@@ -1276,8 +1345,8 @@ export default function App() {
                   <path d="M21 4H26C27.1046 4 28 4.89543 28 6V11" stroke="#201f20" strokeWidth="2.2" strokeLinecap="round" />
                   <path d="M28 21V26C28 27.1046 27.1046 28 26 28H21" stroke="#201f20" strokeWidth="2.2" strokeLinecap="round" />
                   <path d="M11 28H6C4.89543 28 4 27.1046 4 26V21" stroke="#201f20" strokeWidth="2.2" strokeLinecap="round" />
-                  <circle cx="16" cy="16" r="6.5" stroke="var(--accent-highlight, #F2765E)" strokeWidth="2" fill="none" />
-                  <path d="M16 12V20M12 16H20" stroke="var(--accent-highlight, #F2765E)" strokeWidth="1.8" strokeLinecap="round" />
+                  <circle cx="16" cy="16" r="6.5" stroke="var(--accent, #2e5bff)" strokeWidth="2" fill="none" />
+                  <path d="M16 12V20M12 16H20" stroke="var(--accent, #2e5bff)" strokeWidth="1.8" strokeLinecap="round" />
                 </svg>
                 <span>CottonVision</span>
               </a>

@@ -24,8 +24,8 @@
               <path d="M21 4H26C27.1046 4 28 4.89543 28 6V11" stroke="#201f20" stroke-width="2.2" stroke-linecap="round" />
               <path d="M28 21V26C28 27.1046 27.1046 28 26 28H21" stroke="#201f20" stroke-width="2.2" stroke-linecap="round" />
               <path d="M11 28H6C4.89543 28 4 27.1046 4 26V21" stroke="#201f20" stroke-width="2.2" stroke-linecap="round" />
-              <circle cx="16" cy="16" r="6.5" stroke="var(--accent-highlight, #F2765E)" stroke-width="2" fill="none" />
-              <path d="M16 12V20M12 16H20" stroke="var(--accent-highlight, #F2765E)" stroke-width="1.8" stroke-linecap="round" />
+              <circle cx="16" cy="16" r="6.5" stroke="var(--accent, #2e5bff)" stroke-width="2" fill="none" />
+              <path d="M16 12V20M12 16H20" stroke="var(--accent, #2e5bff)" stroke-width="1.8" stroke-linecap="round" />
             </svg>
             <span>CottonVision</span>
           </a>
@@ -107,8 +107,8 @@
                     <path d="M21 4H26C27.1046 4 28 4.89543 28 6V11" stroke="#201f20" stroke-width="2.4" stroke-linecap="round" />
                     <path d="M28 21V26C28 27.1046 27.1046 28 26 28H21" stroke="#201f20" stroke-width="2.4" stroke-linecap="round" />
                     <path d="M11 28H6C4.89543 28 4 27.1046 4 26V21" stroke="#201f20" stroke-width="2.4" stroke-linecap="round" />
-                    <circle cx="16" cy="16" r="6.5" stroke="#F2765E" stroke-width="2.2" fill="none" />
-                    <path d="M16 12V20M12 16H20" stroke="#F2765E" stroke-width="2" stroke-linecap="round" />
+                    <circle cx="16" cy="16" r="6.5" stroke="#2e5bff" stroke-width="2.2" fill="none" />
+                    <path d="M16 12V20M12 16H20" stroke="#2e5bff" stroke-width="2" stroke-linecap="round" />
                   </svg>
                   <span class="win-title-text">CottonVision Inference Workbench</span>
                 </div>
@@ -117,7 +117,7 @@
                   <span>http://localhost:5000</span>
                 </div>
                 <div class="win-chrome-right">
-                  <div class="browser-status-chip">GPU Inference · 30 FPS Synchronized</div>
+                  <div class="browser-status-chip">YOLOv8 Inference Ready</div>
                   <div class="win-controls" aria-hidden="true">
                     <button type="button" class="win-ctrl-btn" tabindex="-1" title="Minimize">
                       <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.3" /></svg>
@@ -151,6 +151,11 @@
                   </div>
                 </div>
 
+                <!-- Active Preset / Live Inference Explanation Strip -->
+                <div class="workbench-preset-strip" id="presetBanner">
+                  <span><strong>Flight 1 — Low-Altitude Weed Cluster (18m AGL):</strong> 4K aerial field pass isolating sparse inter-row weeds with zero cotton crop damage.</span>
+                </div>
+
                 <div class="workbench-comparison">
                   <div class="workbench-pane">
                     <div class="workbench-pane-header">
@@ -159,23 +164,25 @@
                     </div>
                     <div class="workbench-viewport">
                       <img id="rawImg" src="samples/uav_raw_field.png" alt="Original UAV aerial view" class="workbench-media" />
+                      <video id="rawVideo" controls playsinline muted class="workbench-media" style="display: none;"></video>
                       <div class="workbench-overlay-caption">
-                        <span>4K Flight Footage</span>
-                        <span>Altitude: 18m AGL</span>
+                        <span id="rawMetaLabel">4K Flight Footage</span>
+                        <span id="rawMetaDetail">Altitude: 18m AGL</span>
                       </div>
                     </div>
                   </div>
 
                   <div class="workbench-pane">
                     <div class="workbench-pane-header">
-                      <span class="workbench-pane-title">YOLOv8 + OPENVINO</span>
+                      <span class="workbench-pane-title">YOLOv8 Inference</span>
                       <span class="workbench-pane-tag tag-accent">AI Overlay</span>
                     </div>
                     <div class="workbench-viewport">
                       <img id="annotatedImg" src="samples/uav_annotated_field.png" alt="YOLOv8 annotated UAV view" class="workbench-media" />
+                      <video id="annotatedVideo" controls playsinline muted class="workbench-media" style="display: none;"></video>
                       <div class="workbench-overlay-caption">
-                        <span style="color:#F2765E">■ weed 0.82 · ■ cotton 0.94</span>
-                        <span id="statsCaption">14 weeds detected · 0 cotton damaged</span>
+                        <span id="legendCaption"><span style="color:#F2765E">■ weed 0.82</span> · <span style="color:#60a5fa">■ cotton 0.94</span></span>
+                        <span id="statsCaption">14 weeds detected · 0 cotton damaged · Preset Demo</span>
                       </div>
                     </div>
                   </div>
@@ -187,7 +194,17 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-highlight)" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" /></svg>
                     <span><strong>Drop drone image, video, or photo</strong> to run live inference</span>
                   </div>
-                  <div class="workbench-upload-hint">Supports .mp4, .avi, .jpg, .png (Dynamic FPS Sync)</div>
+                  <div class="workbench-upload-hint" id="uploadHint">Supports .mp4, .avi, .jpg, .png (Frame skip: 5x)</div>
+                </div>
+
+                <div class="pipeline-status-box" id="pipelineStatusBox" style="display: none;">
+                  <div class="pipeline-status-header">
+                    <span id="pipelineMsg">Running YOLOv8 inference...</span>
+                    <span id="pipelinePct" class="tabular-nums">0%</span>
+                  </div>
+                  <div class="pipeline-track">
+                    <div class="pipeline-fill" id="pipelineFill" style="width: 0%;"></div>
+                  </div>
                 </div>
 
                 <div class="workbench-footer-bar">
@@ -211,31 +228,31 @@
             </div>
 
             <!-- Controls & Sample Presets Explanation Below Workbench -->
-            <div class="workbench-guide">
+            <div class="workbench-guide" id="workbenchGuide">
               <div class="workbench-guide-header">
-                <h3 class="workbench-guide-title">Inference Studio Presets &amp; Frame Skip Guide</h3>
-                <p class="workbench-guide-sub">Select a preset UAV field pass or tune the temporal sampling interval before uploading video footage.</p>
+                <h3 class="workbench-guide-title">What Flight 1, Flight 2, Flight 3 &amp; Frame Skip Mean</h3>
+                <p class="workbench-guide-sub">Click Flight 1, 2, or 3 above to preview pre-recorded drone test passes, or set Frame Skip before dropping your own image/video.</p>
               </div>
               <div class="workbench-guide-grid">
                 <div class="workbench-guide-item">
                   <span class="workbench-guide-badge">Flight 1</span>
                   <div class="workbench-guide-label">Low-Altitude Weed Cluster</div>
-                  <p class="workbench-guide-desc">4K aerial capture at 18m AGL isolating 14 sparse inter-row weeds with zero false-positive cotton damage.</p>
+                  <p class="workbench-guide-desc">18m AGL 4K drone pass isolating 14 sparse inter-row weeds with zero false-positive cotton damage.</p>
                 </div>
                 <div class="workbench-guide-item">
                   <span class="workbench-guide-badge">Flight 2</span>
                   <div class="workbench-guide-label">Dense Soil Boundary</div>
-                  <p class="workbench-guide-desc">15m AGL pass demonstrating overlapping furrow weed emergence with 22 high-density bounding boxes.</p>
+                  <p class="workbench-guide-desc">15m AGL sample pass showing heavy furrow weed emergence with 22 dense overlapping bounding boxes.</p>
                 </div>
                 <div class="workbench-guide-item">
                   <span class="workbench-guide-badge">Flight 3</span>
                   <div class="workbench-guide-label">Validation Batch Rows</div>
-                  <p class="workbench-guide-desc">Full-canopy test split contrasting structured cotton rows (93.8% mAP@50) against furrow weeds (76.0% mAP@50).</p>
+                  <p class="workbench-guide-desc">Full-canopy validation split contrasting structured cotton rows (93.8% mAP@50) against furrow weeds (76.0%).</p>
                 </div>
                 <div class="workbench-guide-item">
                   <span class="workbench-guide-badge">Frame Skip 1x–15x</span>
                   <div class="workbench-guide-label">Speed vs. Temporal Sync</div>
-                  <p class="workbench-guide-desc">Runs inference every Nth frame to multiply throughput up to 15x while scaling Output FPS = Source FPS / N to keep video timing exact.</p>
+                  <p class="workbench-guide-desc">Runs inference every Nth video frame to speed processing up to 15x while scaling Output FPS = Source FPS / N.</p>
                 </div>
               </div>
             </div>
@@ -305,19 +322,19 @@
                   <rect x="30" y="100" width="120" height="80" rx="8" fill="#ffffff" stroke="#e0e0df" stroke-width="1.5" />
                   <text x="90" y="135" text-anchor="middle" fill="#201f20" font-size="13" font-weight="500" font-family="sans-serif">UAV Flight Feed</text>
                   <text x="90" y="155" text-anchor="middle" fill="#606060" font-size="11" font-family="sans-serif">4K Drone Capture</text>
-                  <path d="M150 120 L210 80" stroke="var(--accent-highlight)" stroke-width="2" stroke-dasharray="4 4" />
-                  <path d="M150 160 L210 200" stroke="var(--accent-highlight)" stroke-width="2" stroke-dasharray="4 4" />
+                  <path d="M150 120 L210 80" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 4" />
+                  <path d="M150 160 L210 200" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 4" />
                   <rect x="210" y="50" width="160" height="60" rx="8" fill="#ffffff" stroke="#e0e0df" stroke-width="1.5" />
                   <text x="290" y="78" text-anchor="middle" fill="#201f20" font-size="12" font-weight="500" font-family="sans-serif">Single-Shot Orthomosaic</text>
                   <text x="290" y="96" text-anchor="middle" fill="#0891b2" font-size="11" font-family="sans-serif">&lt; 380ms Latency</text>
                   <rect x="210" y="170" width="160" height="60" rx="8" fill="#ffffff" stroke="#e0e0df" stroke-width="1.5" />
                   <text x="290" y="198" text-anchor="middle" fill="#201f20" font-size="12" font-weight="500" font-family="sans-serif">Threaded Video Pipeline</text>
-                  <text x="290" y="216" text-anchor="middle" fill="var(--accent-highlight)" font-size="11" font-family="sans-serif">Frame Skip (1x–15x)</text>
+                  <text x="290" y="216" text-anchor="middle" fill="var(--accent)" font-size="11" font-family="sans-serif">Frame Skip (1x–15x)</text>
                   <path d="M370 80 L420 120" stroke="#201f20" stroke-width="1.5" />
                   <path d="M370 200 L420 160" stroke="#201f20" stroke-width="1.5" />
-                  <rect x="420" y="100" width="90" height="80" rx="8" fill="#ffffff" stroke="var(--accent-highlight)" stroke-width="2" />
+                  <rect x="420" y="100" width="90" height="80" rx="8" fill="#ffffff" stroke="var(--accent)" stroke-width="2" />
                   <text x="465" y="135" text-anchor="middle" fill="#201f20" font-size="12" font-weight="600" font-family="sans-serif">Output</text>
-                  <text x="465" y="155" text-anchor="middle" fill="var(--accent-highlight)" font-size="11" font-family="sans-serif">H.264 + YOLO</text>
+                  <text x="465" y="155" text-anchor="middle" fill="var(--accent)" font-size="11" font-family="sans-serif">H.264 + YOLO</text>
                 </svg>
               </div>
               <div class="illustration-caption-bar"><span>Dual-branch parallel routing</span><span>Zero thread blocking</span></div>
@@ -341,19 +358,19 @@
                 <svg viewBox="0 0 540 280" width="100%" height="auto" fill="none">
                   <rect width="540" height="280" fill="#f7f6f6" />
                   <text x="40" y="45" fill="#201f20" font-size="12" font-weight="600" font-family="sans-serif">Raw Flight: 30 FPS Source Stream</text>
-                  <rect x="40" y="60" width="36" height="42" rx="4" fill="var(--accent-highlight)" /><text x="58" y="85" text-anchor="middle" fill="#141314" font-size="11" font-weight="600">F1</text>
+                  <rect x="40" y="60" width="36" height="42" rx="4" fill="var(--accent)" /><text x="58" y="85" text-anchor="middle" fill="#fcfcfd" font-size="11" font-weight="600">F1</text>
                   <rect x="86" y="60" width="36" height="42" rx="4" fill="#fff" stroke="#e0e0df" /><text x="104" y="85" text-anchor="middle" fill="#606060" font-size="11">F2</text>
                   <rect x="132" y="60" width="36" height="42" rx="4" fill="#fff" stroke="#e0e0df" /><text x="150" y="85" text-anchor="middle" fill="#606060" font-size="11">F3</text>
                   <rect x="178" y="60" width="36" height="42" rx="4" fill="#fff" stroke="#e0e0df" /><text x="196" y="85" text-anchor="middle" fill="#606060" font-size="11">F4</text>
                   <rect x="224" y="60" width="36" height="42" rx="4" fill="#fff" stroke="#e0e0df" /><text x="242" y="85" text-anchor="middle" fill="#606060" font-size="11">F5</text>
-                  <rect x="270" y="60" width="36" height="42" rx="4" fill="var(--accent-highlight)" /><text x="288" y="85" text-anchor="middle" fill="#141314" font-size="11" font-weight="600">F6</text>
+                  <rect x="270" y="60" width="36" height="42" rx="4" fill="var(--accent)" /><text x="288" y="85" text-anchor="middle" fill="#fcfcfd" font-size="11" font-weight="600">F6</text>
                   <rect x="316" y="60" width="36" height="42" rx="4" fill="#fff" stroke="#e0e0df" /><text x="334" y="85" text-anchor="middle" fill="#606060" font-size="11">F7</text>
-                  <path d="M270 120 L270 155" stroke="var(--accent-highlight)" stroke-width="2" stroke-dasharray="3 3" />
-                  <text x="285" y="142" fill="var(--accent-highlight)" font-size="11" font-weight="600" font-family="sans-serif">5× Frame Skip Interval</text>
+                  <path d="M270 120 L270 155" stroke="var(--accent)" stroke-width="2" stroke-dasharray="3 3" />
+                  <text x="285" y="142" fill="var(--accent)" font-size="11" font-weight="600" font-family="sans-serif">5× Frame Skip Interval</text>
                   <text x="40" y="180" fill="#201f20" font-size="12" font-weight="600" font-family="sans-serif">Reconstructed Output: 6 FPS Temporal Sync (H.264)</text>
-                  <rect x="40" y="195" width="210" height="48" rx="6" fill="#ffffff" stroke="var(--accent-highlight)" stroke-width="1.5" />
+                  <rect x="40" y="195" width="210" height="48" rx="6" fill="#ffffff" stroke="var(--accent)" stroke-width="1.5" />
                   <text x="145" y="224" text-anchor="middle" fill="#201f20" font-size="12" font-weight="500" font-family="sans-serif">Annotated Keyframe 1 (Hold: 166ms)</text>
-                  <rect x="270" y="195" width="210" height="48" rx="6" fill="#ffffff" stroke="var(--accent-highlight)" stroke-width="1.5" />
+                  <rect x="270" y="195" width="210" height="48" rx="6" fill="#ffffff" stroke="var(--accent)" stroke-width="1.5" />
                   <text x="375" y="224" text-anchor="middle" fill="#201f20" font-size="12" font-weight="500" font-family="sans-serif">Annotated Keyframe 6 (Hold: 166ms)</text>
                 </svg>
               </div>
@@ -385,8 +402,8 @@
                   <text x="95" y="160" fill="#606060" font-size="11" font-family="sans-serif">frame_0006.jpg</text>
                   <rect x="285" y="90" width="190" height="120" rx="6" fill="#f7f6f6" stroke="#e0e0df" stroke-width="1" />
                   <text x="300" y="115" fill="#201f20" font-size="12" font-weight="500" font-family="sans-serif">labels/</text>
-                  <text x="315" y="140" fill="var(--accent-highlight)" font-size="11" font-family="monospace">1 0.452 0.321 0.08 0.06</text>
-                  <text x="315" y="160" fill="var(--accent-highlight)" font-size="11" font-family="monospace">1 0.781 0.654 0.12 0.09</text>
+                  <text x="315" y="140" fill="var(--accent)" font-size="11" font-family="monospace">1 0.452 0.321 0.08 0.06</text>
+                  <text x="315" y="160" fill="var(--accent)" font-size="11" font-family="monospace">1 0.781 0.654 0.12 0.09</text>
                 </svg>
               </div>
               <div class="illustration-caption-bar"><span>Normalized YOLOv8 labels</span><span>Direct import to Ultralytics training</span></div>
@@ -721,8 +738,8 @@
                 <path d="M21 4H26C27.1046 4 28 4.89543 28 6V11" stroke="#201f20" stroke-width="2.2" stroke-linecap="round" />
                 <path d="M28 21V26C28 27.1046 27.1046 28 26 28H21" stroke="#201f20" stroke-width="2.2" stroke-linecap="round" />
                 <path d="M11 28H6C4.89543 28 4 27.1046 4 26V21" stroke="#201f20" stroke-width="2.2" stroke-linecap="round" />
-                <circle cx="16" cy="16" r="6.5" stroke="#F2765E" stroke-width="2" fill="none" />
-                <path d="M16 12V20M12 16H20" stroke="#F2765E" stroke-width="1.8" stroke-linecap="round" />
+                <circle cx="16" cy="16" r="6.5" stroke="var(--accent, #2e5bff)" stroke-width="2" fill="none" />
+                <path d="M16 12V20M12 16H20" stroke="var(--accent, #2e5bff)" stroke-width="1.8" stroke-linecap="round" />
               </svg>
               <span>CottonVision</span>
             </a>
@@ -775,37 +792,160 @@
     </footer>
   </div>
 
-  <!-- Vanilla JS Interactive Controls -->
+  <!-- Interactive Workbench & Live Backend API Integration -->
   <script>
-    // Presets
     const presets = {
       1: {
+        title: 'Flight 1 — Low-Altitude Weed Cluster (18m AGL)',
+        description: '4K aerial field pass isolating sparse inter-row weeds with zero cotton crop damage.',
         raw: 'samples/uav_raw_field.png',
         annotated: 'samples/uav_annotated_field.png',
-        stats: '14 weeds detected · 0 cotton damaged · Conf 0.82'
+        legendWeed: 'weed 0.82',
+        legendCotton: 'cotton 0.94',
+        stats: '14 weeds detected · 0 cotton damaged · Preset Demo',
+        metaLabel: '4K Flight Footage',
+        metaDetail: 'Altitude: 18m AGL'
       },
       2: {
+        title: 'Flight 2 — Dense Soil Boundary (15m AGL)',
+        description: 'Sample pass demonstrating overlapping furrow weed emergence with dense multi-box detections.',
         raw: 'samples/uav_raw_field.png',
         annotated: 'samples/weed_cluster_08.jpg',
-        stats: '22 weeds detected · Multi-box clustering'
+        legendWeed: 'weed 0.78',
+        legendCotton: 'cotton 0.91',
+        stats: '22 weeds detected · Multi-box clustering · Preset Demo',
+        metaLabel: '4K Flight Footage',
+        metaDetail: 'Altitude: 15m AGL'
       },
       3: {
+        title: 'Flight 3 — Validation Batch Rows',
+        description: 'Full-canopy test split contrasting structured cotton rows (93.8% mAP@50) against furrow weeds (76.0%).',
         raw: 'samples/cotton_row_tile.jpg',
         annotated: 'samples/cotton_rows_val.jpg',
-        stats: 'Cotton mAP 93.8% · Weed mAP 76.0%'
+        legendWeed: 'weed 0.76',
+        legendCotton: 'cotton 0.94',
+        stats: 'Cotton mAP 93.8% · Weed mAP 76.0% · Preset Demo',
+        metaLabel: 'Validation Canopy Split',
+        metaDetail: 'Balanced Weed + Cotton'
       }
     };
+
+    let activeSkip = 5;
+    let activePollTimer = null;
+    let currentExports = {
+      videoUrl: null,
+      snapUrl: 'samples/uav_annotated_field.png',
+      zipUrl: null
+    };
+
+    const rawImgEl = document.getElementById('rawImg');
+    const rawVideoEl = document.getElementById('rawVideo');
+    const annotatedImgEl = document.getElementById('annotatedImg');
+    const annotatedVideoEl = document.getElementById('annotatedVideo');
+    const rawMetaLabelEl = document.getElementById('rawMetaLabel');
+    const rawMetaDetailEl = document.getElementById('rawMetaDetail');
+    const legendCaptionEl = document.getElementById('legendCaption');
+    const statsCaptionEl = document.getElementById('statsCaption');
+    const presetBannerEl = document.getElementById('presetBanner');
+    const uploadHintEl = document.getElementById('uploadHint');
+    const pipelineBoxEl = document.getElementById('pipelineStatusBox');
+    const pipelineMsgEl = document.getElementById('pipelineMsg');
+    const pipelinePctEl = document.getElementById('pipelinePct');
+    const pipelineFillEl = document.getElementById('pipelineFill');
+
+    function setBannerText(strongTitle, detailText) {
+      presetBannerEl.textContent = '';
+      const span = document.createElement('span');
+      const strong = document.createElement('strong');
+      strong.textContent = strongTitle + ':';
+      span.appendChild(strong);
+      span.appendChild(document.createTextNode(' ' + detailText));
+      presetBannerEl.appendChild(span);
+    }
+
+    function renderLegend(weedLabel, cottonLabel) {
+      legendCaptionEl.textContent = '';
+      const wSpan = document.createElement('span');
+      wSpan.style.color = '#F2765E';
+      wSpan.textContent = '■ ' + weedLabel;
+      const sep = document.createTextNode(' · ');
+      const cSpan = document.createElement('span');
+      cSpan.style.color = '#60a5fa';
+      cSpan.textContent = '■ ' + cottonLabel;
+      legendCaptionEl.appendChild(wSpan);
+      legendCaptionEl.appendChild(sep);
+      legendCaptionEl.appendChild(cSpan);
+    }
+
+    function setMediaMode(isVideo, rawSrc, annotatedSrc) {
+      if (isVideo) {
+        rawImgEl.style.display = 'none';
+        annotatedImgEl.style.display = 'none';
+        rawVideoEl.style.display = 'block';
+        annotatedVideoEl.style.display = 'block';
+        rawVideoEl.src = rawSrc;
+        annotatedVideoEl.src = annotatedSrc || rawSrc;
+      } else {
+        rawVideoEl.style.display = 'none';
+        annotatedVideoEl.style.display = 'none';
+        rawImgEl.style.display = 'block';
+        annotatedImgEl.style.display = 'block';
+        rawImgEl.src = rawSrc;
+        annotatedImgEl.src = annotatedSrc || rawSrc;
+      }
+    }
+
+    function setPipelineProgress(visible, msg, pct) {
+      pipelineBoxEl.style.display = visible ? 'flex' : 'none';
+      if (visible) {
+        pipelineMsgEl.textContent = msg;
+        const clamped = Math.max(0, Math.min(100, Number(pct) || 0));
+        pipelinePctEl.textContent = clamped + '%';
+        pipelineFillEl.style.width = clamped + '%';
+      }
+    }
+
+    function formatLiveSummary(summary) {
+      if (!summary) {
+        return {
+          weed: 'weed: 0',
+          cotton: 'cotton: 0',
+          stats: '0 detections'
+        };
+      }
+      const wCount = summary.weed_count ?? 0;
+      const cCount = summary.cotton_count ?? 0;
+      const wConf = summary.weed_conf != null ? ' (avg ' + Number(summary.weed_conf).toFixed(2) + ')' : '';
+      const cConf = summary.cotton_conf != null ? ' (avg ' + Number(summary.cotton_conf).toFixed(2) + ')' : '';
+      const total = summary.total_detections ?? (wCount + cCount);
+      const ms = summary.inference_ms ? ' · ' + summary.inference_ms + 'ms' : '';
+      const dev = summary.device ? ' · ' + summary.device : '';
+      return {
+        weed: 'weed: ' + wCount + wConf,
+        cotton: 'cotton: ' + cCount + cConf,
+        stats: total + ' detection' + (total === 1 ? '' : 's') + ms + dev
+      };
+    }
 
     // Preset switcher
     document.querySelectorAll('#presetSwitcher .preset-tab').forEach(btn => {
       btn.addEventListener('click', () => {
+        if (activePollTimer) {
+          clearInterval(activePollTimer);
+          activePollTimer = null;
+        }
+        setPipelineProgress(false, '', 0);
         document.querySelectorAll('#presetSwitcher .preset-tab').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         const p = presets[btn.dataset.preset];
         if (p) {
-          document.getElementById('rawImg').src = p.raw;
-          document.getElementById('annotatedImg').src = p.annotated;
-          document.getElementById('statsCaption').textContent = p.stats;
+          setMediaMode(false, p.raw, p.annotated);
+          setBannerText(p.title, p.description);
+          rawMetaLabelEl.textContent = p.metaLabel;
+          rawMetaDetailEl.textContent = p.metaDetail;
+          renderLegend(p.legendWeed, p.legendCotton);
+          statsCaptionEl.textContent = p.stats;
+          currentExports = { videoUrl: null, snapUrl: p.annotated, zipUrl: null };
         }
       });
     });
@@ -815,6 +955,8 @@
       btn.addEventListener('click', () => {
         document.querySelectorAll('#skipPills .frame-skip-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        activeSkip = Number(btn.dataset.skip) || 5;
+        uploadHintEl.textContent = 'Supports .mp4, .avi, .jpg, .png (Frame skip: ' + activeSkip + 'x)';
       });
     });
 
@@ -850,7 +992,7 @@
       });
     });
 
-    // File upload preview
+    // Live File Upload + Backend YOLOv8 Inference
     const fileInput = document.getElementById('fileInput');
     const uploadZone = document.getElementById('uploadZone');
     uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragging'); });
@@ -864,25 +1006,162 @@
       if (e.target.files[0]) handleClientFile(e.target.files[0]);
     });
 
-    function handleClientFile(file) {
-      const url = URL.createObjectURL(file);
-      document.getElementById('rawImg').src = url;
-      document.getElementById('annotatedImg').src = url;
-      document.getElementById('statsCaption').textContent = 'Processing uploaded file: ' + file.name;
+    async function handleClientFile(file) {
+      const ext = (file.name.split('.').pop() || '').toLowerCase();
+      const isVideo = ['mp4', 'avi', 'mov', 'mkv'].includes(ext);
+      const isImage = ['jpg', 'jpeg', 'png', 'bmp', 'webp'].includes(ext);
+      if (!isVideo && !isImage) {
+        setBannerText('Unsupported File', 'Please drop a valid drone image (.jpg, .png, .webp) or video (.mp4, .avi, .mov).');
+        return;
+      }
+
+      if (activePollTimer) {
+        clearInterval(activePollTimer);
+        activePollTimer = null;
+      }
+
+      document.querySelectorAll('#presetSwitcher .preset-tab').forEach(b => b.classList.remove('active'));
+      const objUrl = URL.createObjectURL(file);
+      setMediaMode(isVideo, objUrl, objUrl);
+      rawMetaLabelEl.textContent = isVideo ? 'Uploaded Drone Video' : 'Uploaded Drone Image';
+      rawMetaDetailEl.textContent = file.name;
+      renderLegend('running model...', 'YOLOv8');
+      statsCaptionEl.textContent = 'Uploading ' + file.name + ' to backend...';
+      setBannerText('Live Inference — ' + file.name, 'Uploading media payload to Flask server for YOLOv8 detection...');
+      setPipelineProgress(true, 'Uploading ' + file.name + '...', 20);
+      currentExports = { videoUrl: null, snapUrl: null, zipUrl: null };
+
+      const fd = new FormData();
+      fd.append('file', file);
+
+      try {
+        const upRes = await fetch('/api/upload', { method: 'POST', body: fd });
+        const upData = await upRes.json();
+        if (!upRes.ok || upData.error) {
+          throw new Error(upData.error || 'Upload rejected by server');
+        }
+
+        if (upData.type === 'image') {
+          setPipelineProgress(true, 'Running YOLOv8 detection on ' + upData.filename + '...', 65);
+          statsCaptionEl.textContent = 'Running YOLOv8 inference...';
+          const imgRes = await fetch('/api/process-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: upData.filename, conf: 0.25 })
+          });
+          const imgData = await imgRes.json();
+          if (!imgRes.ok || imgData.error) {
+            throw new Error(imgData.error || 'Image inference failed');
+          }
+
+          setPipelineProgress(true, 'Inference complete', 100);
+          annotatedImgEl.src = imgData.annotated_url + '?t=' + Date.now();
+          const formatted = formatLiveSummary(imgData.summary);
+          renderLegend(formatted.weed, formatted.cotton);
+          statsCaptionEl.textContent = formatted.stats;
+          setBannerText(
+            'Live Inference Complete — ' + file.name,
+            formatted.stats + (imgData.summary && imgData.summary.model ? ' · Model: ' + imgData.summary.model : '')
+          );
+          currentExports = {
+            videoUrl: null,
+            snapUrl: imgData.annotated_url,
+            zipUrl: imgData.labels_zip_url || imgData.label_url
+          };
+          setTimeout(() => setPipelineProgress(false, '', 0), 700);
+        } else {
+          setPipelineProgress(true, 'Queuing video pipeline (skip ' + activeSkip + 'x)...', 30);
+          statsCaptionEl.textContent = 'Starting video pipeline...';
+          const vidRes = await fetch('/api/process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: upData.filename, frame_interval: activeSkip, conf: 0.25 })
+          });
+          const vidData = await vidRes.json();
+          if (!vidRes.ok || vidData.error) {
+            throw new Error(vidData.error || 'Video pipeline rejected request');
+          }
+
+          activePollTimer = setInterval(async () => {
+            try {
+              const stRes = await fetch('/api/status/' + encodeURIComponent(vidData.job_id));
+              const stData = await stRes.json();
+              const pct = (stData.progress && stData.progress.percent != null) ? stData.progress.percent : 40;
+              setPipelineProgress(true, stData.message || 'Processing frames...', pct);
+              statsCaptionEl.textContent = stData.message || 'Processing video...';
+
+              if (stData.status === 'done') {
+                clearInterval(activePollTimer);
+                activePollTimer = null;
+                setPipelineProgress(false, '', 0);
+                setMediaMode(true, objUrl, stData.result.output_video_url);
+                const formatted = formatLiveSummary(stData.result.summary);
+                renderLegend(formatted.weed, formatted.cotton);
+                statsCaptionEl.textContent = formatted.stats + ' · ' + (stData.result.total_frames || 0) + ' frames';
+                setBannerText('Video Inference Complete — ' + file.name, statsCaptionEl.textContent);
+                currentExports = {
+                  videoUrl: stData.result.output_video_url,
+                  snapUrl: stData.result.snapshot_url || null,
+                  zipUrl: stData.result.labels_url || null
+                };
+              } else if (stData.status === 'error') {
+                clearInterval(activePollTimer);
+                activePollTimer = null;
+                setPipelineProgress(false, '', 0);
+                throw new Error(stData.message || 'Video inference failed');
+              }
+            } catch (pollErr) {
+              clearInterval(activePollTimer);
+              activePollTimer = null;
+              setPipelineProgress(false, '', 0);
+              renderLegend('inference error', 'check server');
+              statsCaptionEl.textContent = pollErr.message;
+              setBannerText('Video Inference Error', pollErr.message);
+            }
+          }, 900);
+        }
+      } catch (err) {
+        setPipelineProgress(false, '', 0);
+        renderLegend('inference failed', 'see status');
+        statsCaptionEl.textContent = err.message || 'Backend inference error';
+        setBannerText('Inference Error — ' + file.name, err.message || 'Could not complete YOLOv8 inference.');
+      }
     }
 
     // Export Buttons
     document.getElementById('dlSnapBtn').addEventListener('click', () => {
+      const targetUrl = currentExports.snapUrl || (annotatedImgEl.style.display !== 'none' ? annotatedImgEl.src : null);
+      if (!targetUrl) {
+        setBannerText('Export Notice', 'Run inference on an image or video first to save an annotated snapshot.');
+        return;
+      }
       const a = document.createElement('a');
-      a.href = document.getElementById('annotatedImg').src;
-      a.download = 'cottonvision_snapshot.jpg';
+      a.href = targetUrl;
+      a.download = 'cottonvision_annotated.jpg';
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
     });
+
     document.getElementById('dlVideoBtn').addEventListener('click', () => {
-      alert('H.264 Reconstructed Drone Stream download ready.');
+      if (!currentExports.videoUrl) {
+        setBannerText('Video Export Notice', 'Upload a drone video (.mp4 or .avi) above to render and download the reconstructed H.264 stream.');
+        return;
+      }
+      const a = document.createElement('a');
+      a.href = currentExports.videoUrl;
+      a.download = 'cottonvision_reconstructed.mp4';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     });
+
     document.getElementById('dlZipBtn').addEventListener('click', () => {
-      alert('YOLOv8 Dataset .zip export package generated.');
+      if (!currentExports.zipUrl) {
+        setBannerText('Dataset Export Notice', 'Upload an image or drone video above first to export real YOLOv8 bounding-box labels (.zip).');
+        return;
+      }
+      window.location.href = currentExports.zipUrl;
     });
   </script>
 </body>
