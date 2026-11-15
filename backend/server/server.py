@@ -126,20 +126,22 @@ def process_image():
 
     # The confidence threshold for annotation can be passed in the request data, defaulting to 0.25 if not provided.
     conf = float(data.get("conf", 0.25))
-    # We generate a timestamp to create unique output filenames for the annotated image and label file.
+    # We generate a timestamp + short nonce to create unique output filenames for traceability and cache safety.
     ts   = generate_timestamp()
+    nonce = uuid.uuid4().hex[:6]
 
-    try: 
-        out_name = f"inference_{ts}_{upload_path.name}" # Output filename includes timestamp and original name for traceability
-        out_path = OUTPUT_DIR / out_name 
+    try:
+        out_name = f"inference_{ts}_{nonce}_{upload_path.name}"
+        out_path = OUTPUT_DIR / out_name
         res = annotate_single_image(str(upload_path), str(out_path), conf=conf)
-        # res is expected to contain keys like "label_path" for the generated label file path
-        # res is the reason behind of the txt file that is generated with the same name as the image but with .txt extension, which contains the labels in YOLO format.
-        
+        label_name = Path(res["label_path"]).name
+
         return jsonify({
-            "annotated_url": f"/api/media/output/{out_name}",
-            "label_url":     f"/api/media/output/{Path(res['label_path']).name}",
-            "timestamp":     ts,
+            "annotated_url":  f"/api/media/output/{out_name}",
+            "label_url":      f"/api/media/output/{label_name}",
+            "labels_zip_url": f"/api/download/image-dataset/{out_name}",
+            "timestamp":      ts,
+            "summary":        res.get("summary", {}),
         })
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500 # 500 = Internal Server Error
@@ -220,6 +222,27 @@ def download_dataset(job_id: str):
                    download_name=f"yolo_dataset_{job_id[:8]}.zip") # Last 8 characters of the job ID are used in the zip file 
 
 
+@app.route("/api/download/image-dataset/<path:image_filename>", methods=["GET"])
+def download_image_dataset(image_filename: str):
+    """Zip and download paired annotated image and YOLO .txt label from single-image inference."""
+    safe_img = (OUTPUT_DIR / image_filename).resolve()
+    if not str(safe_img).startswith(str(OUTPUT_DIR.resolve())):
+        return abort(403)
+    if not safe_img.exists() or not safe_img.is_file():
+        return abort(404)
+
+    safe_lbl = safe_img.with_suffix(".txt")
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.write(str(safe_img), safe_img.name)
+        if safe_lbl.exists() and safe_lbl.is_file():
+            zf.write(str(safe_lbl), safe_lbl.name)
+
+    zip_buffer.seek(0)
+    return send_file(zip_buffer, mimetype="application/zip", as_attachment=True,
+                     download_name=f"yolo_labels_{safe_img.stem}.zip")
+
+
 # Downloading the folder endpoint is a more general version of the dataset download, allowing users to download any folder within the output directory. It performs a security check to ensure that the requested folder is indeed within the output directory to prevent unauthorized access to other parts of the filesystem. If the folder exists and is valid, it creates an in-memory zip file of the entire folder and serves it as a downloadable response.
 @app.route("/api/download/folder/<path:folder_name>", methods=["GET"])
 def download_folder(folder_name: str):
@@ -284,8 +307,10 @@ def _run_pipeline(job_id: str, video_path: str, frame_interval: int, conf: float
             _set_job(job_id, "running", f"Annotating frame {current}/{total}",
                      progress={"step": "annotating", "current": current, "total": total, "percent": pct})
 
+        pipeline_summary: dict = {}
         annotate_frames(str(frames_dir), str(annotated_dir), conf=conf,
-                        progress_callback=on_progress, dataset_dir=str(dataset_dir))
+                        progress_callback=on_progress, dataset_dir=str(dataset_dir),
+                        summary_out=pipeline_summary)
 
         # Step 3 – Rebuild Video (H.264 via ffmpeg)
         _set_job(job_id, "running", "Building web-optimized video…", progress={"step": "converting", "percent": 95})
@@ -310,6 +335,7 @@ def _run_pipeline(job_id: str, video_path: str, frame_interval: int, conf: float
             "dataset_dir":      str(dataset_dir),
             "timestamp":        ts,
             "total_frames":     saved_count,
+            "summary":          pipeline_summary,
         }
         _set_job(job_id, "done", "Done! Result ready for download.", result,
                  progress={"step": "done", "percent": 100, "current": saved_count, "total": saved_count})

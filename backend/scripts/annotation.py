@@ -13,6 +13,7 @@ import os
 import argparse
 import cv2
 import threading
+import time
 from pathlib import Path
 
 _YOLO_AVAILABLE = False
@@ -69,6 +70,72 @@ def _save_yolo_labels(results, img_width: int, img_height: int, label_path: Path
     label_path.write_text("\n".join(lines) + ("\n" if lines else ""))
 
 
+def _resolve_device_label(model_path: str, explicit_device: str | None) -> str:
+    """Return human-readable runtime backend label used for prediction."""
+    if explicit_device == 'GPU':
+        return "OpenVINO GPU"
+    if explicit_device == 'CPU':
+        return "OpenVINO CPU"
+    try:
+        import torch
+        if torch.cuda.is_available():
+            return "CUDA GPU"
+    except Exception:
+        pass
+    return "CPU"
+
+
+def _predict_with_fallback(model, source: str, conf: float, device: str | None):
+    """Run YOLO inference with OpenVINO GPU-to-CPU fallback if GPU plugin fails."""
+    try:
+        return model.predict(source=source, conf=conf, verbose=False, device=device), device
+    except Exception:
+        if device == 'GPU':
+            return model.predict(source=source, conf=conf, verbose=False, device='CPU'), 'CPU'
+        raise
+
+
+def _collect_box_stats(results, model_names: dict, counts: dict, conf_sums: dict):
+    """Accumulate detection counts and confidence sums across prediction results."""
+    for r in results:
+        if r.boxes is None or len(r.boxes) == 0:
+            continue
+        names = getattr(r, "names", None) or model_names or {}
+        for box in r.boxes:
+            cls_id = int(box.cls[0])
+            conf_val = float(box.conf[0])
+            cls_name = str(names.get(cls_id, f"class_{cls_id}")).lower()
+            counts[cls_name] = counts.get(cls_name, 0) + 1
+            conf_sums[cls_name] = conf_sums.get(cls_name, 0.0) + conf_val
+
+
+def _build_summary(
+    counts: dict,
+    conf_sums: dict,
+    elapsed_ms: int,
+    model_path: str,
+    device_label: str,
+    frame_count: int = 1,
+) -> dict:
+    """Format class counts and mean confidences into an API-ready summary dict."""
+    weed_count = int(counts.get("weed", 0))
+    cotton_count = int(counts.get("cotton", 0))
+    weed_conf = round(conf_sums["weed"] / weed_count, 2) if weed_count else None
+    cotton_conf = round(conf_sums["cotton"] / cotton_count, 2) if cotton_count else None
+    total = int(sum(counts.values()))
+    return {
+        "weed_count": weed_count,
+        "weed_conf": weed_conf,
+        "cotton_count": cotton_count,
+        "cotton_conf": cotton_conf,
+        "total_detections": total,
+        "inference_ms": int(elapsed_ms),
+        "frames_processed": int(frame_count),
+        "model": Path(model_path).name,
+        "device": device_label,
+    }
+
+
 def annotate_frames(
     input_dir: str,
     output_dir: str,
@@ -76,6 +143,7 @@ def annotate_frames(
     conf: float = 0.25,
     progress_callback=None,
     dataset_dir: str = None,
+    summary_out: dict = None,
 ) -> int:
     """
     Run inference on all images in *input_dir*.
@@ -99,16 +167,21 @@ def annotate_frames(
     model = _get_model(model_path)
     # Use Intel GPU if it's an OpenVINO model or if GPU is available
     device = 'GPU' if 'openvino' in model_path.lower() or Path(model_path).is_dir() else None
-    
-    total = len(image_files)
-    print(f"[annotation] Model: {model_path} | Device: {device or 'CPU'}")
+    used_device = device
 
+    total = len(image_files)
+    print(f"[annotation] Model: {model_path} | Device: {device or 'Auto'}")
+
+    counts: dict = {}
+    conf_sums: dict = {}
+    t0 = time.perf_counter()
     count = 0
     for idx, img_path in enumerate(image_files):
         with _model_lock:
-            # Task 2: Explicitly use GPU device
-            results = model.predict(source=str(img_path), conf=conf, verbose=False, device=device)
+            results, used_device = _predict_with_fallback(model, str(img_path), conf, device)
+            device = used_device
 
+        _collect_box_stats(results, getattr(model, "names", {}), counts, conf_sums)
         annotated = results[0].plot()
         out_path = output_dir / img_path.name
         cv2.imwrite(str(out_path), annotated)
@@ -125,6 +198,17 @@ def annotate_frames(
         count += 1
         if progress_callback: progress_callback(count, total)
         if count % 50 == 0: print(f"[annotation] {count}/{total} frames…")
+
+    if isinstance(summary_out, dict):
+        elapsed_ms = int((time.perf_counter() - t0) * 1000)
+        summary_out.update(_build_summary(
+            counts,
+            conf_sums,
+            elapsed_ms,
+            model_path,
+            _resolve_device_label(model_path, used_device),
+            frame_count=count,
+        ))
 
     return count
 
@@ -143,8 +227,14 @@ def annotate_single_image(
     model = _get_model(model_path)
     device = 'GPU' if 'openvino' in model_path.lower() or Path(model_path).is_dir() else None
 
+    t0 = time.perf_counter()
     with _model_lock:
-        results = model.predict(source=str(input_path), conf=conf, verbose=False, device=device)
+        results, used_device = _predict_with_fallback(model, str(input_path), conf, device)
+    elapsed_ms = int((time.perf_counter() - t0) * 1000)
+
+    counts: dict = {}
+    conf_sums: dict = {}
+    _collect_box_stats(results, getattr(model, "names", {}), counts, conf_sums)
 
     annotated = results[0].plot()
     cv2.imwrite(str(output_path), annotated)
@@ -156,6 +246,14 @@ def annotate_single_image(
     return {
         "image_path": str(output_path.resolve()),
         "label_path": str(label_path.resolve()),
+        "summary": _build_summary(
+            counts,
+            conf_sums,
+            elapsed_ms,
+            model_path,
+            _resolve_device_label(model_path, used_device),
+            frame_count=1,
+        ),
     }
 
 
