@@ -37,12 +37,12 @@
   --accent-highlight-border: rgba(242, 118, 94, 0.55);
   --accent-highlight-ink: #141314;
 
-  --accent: var(--accent-highlight);
-  --accent-hover: var(--accent-highlight-hover);
-  --accent-active: #c8523b;
-  --accent-subtle: var(--accent-highlight-subtle);
-  --primary-action-fill: var(--accent-highlight);
-  --primary-action-label: var(--accent-highlight-ink);
+  --accent: #2e5bff;
+  --accent-hover: #1e46db;
+  --accent-active: #1637b5;
+  --accent-subtle: rgba(46, 91, 255, 0.09);
+  --primary-action-fill: #2e5bff;
+  --primary-action-label: #fcfcfd;
 
   /* Semantic Telemetry Colours (for product imagery & CV diagrams) */
   --cv-weed: var(--accent-highlight);
@@ -166,8 +166,8 @@ body,
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  background-color: var(--accent-highlight);
-  color: var(--accent-highlight-ink);
+  background-color: var(--accent);
+  color: var(--primary-action-label);
   border-radius: var(--control-corner);
   padding: 4px 14px;
   margin-bottom: 14px;
@@ -377,7 +377,7 @@ body,
    ========================================================================== */
 
 .hero-band {
-  padding-top: 64px;
+  padding-top: 40px;
   padding-bottom: var(--band-bottom);
 }
 
@@ -385,7 +385,7 @@ body,
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 44px;
+  gap: 28px;
 }
 
 .hero-copy-col {
@@ -479,7 +479,7 @@ body,
   margin-inline: auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 /* Windows-Style Application Window Frame & Live Workbench */
@@ -551,7 +551,7 @@ body,
   width: 7px;
   height: 7px;
   border-radius: var(--control-corner);
-  background-color: var(--accent-highlight);
+  background-color: var(--status-ok);
   flex-shrink: 0;
 }
 
@@ -565,9 +565,9 @@ body,
 .browser-status-chip {
   font-size: 11px;
   font-weight: 600;
-  color: var(--accent-highlight-ink);
-  background-color: var(--accent-highlight);
-  border: 1px solid var(--accent-highlight);
+  color: var(--accent);
+  background-color: var(--accent-subtle);
+  border: 1px solid rgba(46, 91, 255, 0.28);
   border-radius: var(--control-corner);
   padding: 3px 10px;
   white-space: nowrap;
@@ -601,25 +601,45 @@ body,
   color: #ffffff;
 }
 
+/* Active preset info banner inside workbench */
+.workbench-preset-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  background-color: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--surface-corner);
+  padding: 7px 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.workbench-preset-strip strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
 /* Workbench Controls Guide Card Below Window */
 .workbench-guide {
   background-color: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--surface-corner);
-  padding: 24px 28px;
+  padding: 18px 22px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
   text-align: center;
 }
 
 .workbench-guide-header {
-  max-width: 680px;
+  max-width: 720px;
   margin-inline: auto;
 }
 
 .workbench-guide-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: var(--display-weight);
   color: var(--text-primary);
   margin-bottom: 4px;
@@ -633,7 +653,7 @@ body,
 .workbench-guide-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  gap: 12px;
   text-align: center;
 }
 
@@ -641,11 +661,11 @@ body,
   background-color: var(--page-ground);
   border: 1px solid var(--hairline);
   border-radius: var(--surface-corner);
-  padding: 16px 14px;
+  padding: 14px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .workbench-guide-badge {
@@ -654,8 +674,8 @@ body,
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  background-color: var(--accent-highlight);
-  color: var(--accent-highlight-ink);
+  background-color: var(--accent);
+  color: var(--primary-action-label);
   border-radius: var(--control-corner);
   padding: 3px 10px;
 }
@@ -667,9 +687,9 @@ body,
 }
 
 .workbench-guide-desc {
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .workbench-body {
@@ -729,9 +749,9 @@ body,
 }
 
 .frame-skip-pill.active {
-  background-color: var(--accent-highlight);
-  border-color: var(--accent-highlight);
-  color: var(--accent-highlight-ink);
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--primary-action-label);
   font-weight: 600;
 }
 
@@ -755,9 +775,9 @@ body,
 }
 
 .preset-tab.active {
-  background-color: var(--accent-highlight);
-  border-color: var(--accent-highlight);
-  color: var(--accent-highlight-ink);
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--primary-action-label);
   font-weight: 600;
 }
 
@@ -805,15 +825,16 @@ body,
 }
 
 .workbench-pane-tag.tag-accent {
-  background-color: var(--accent-highlight);
-  border-color: var(--accent-highlight);
-  color: var(--accent-highlight-ink);
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--primary-action-label);
   font-weight: 600;
 }
 
 .workbench-viewport {
   position: relative;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 10;
+  max-height: 275px;
   width: 100%;
   background-color: #d6c5b8;
   overflow: hidden;
@@ -974,7 +995,7 @@ body,
 
 .pipeline-fill {
   height: 100%;
-  background-color: var(--accent);
+  background-color: var(--accent-highlight);
   border-radius: var(--control-corner);
   transition: width 0.25s ease;
 }
@@ -1070,8 +1091,8 @@ body,
 }
 
 .logo-item:hover {
-  border-color: var(--accent-highlight);
-  background-color: var(--accent-highlight-subtle);
+  border-color: var(--accent);
+  background-color: var(--accent-subtle);
   transform: translateY(-1px);
 }
 
@@ -1144,8 +1165,8 @@ body,
   display: inline-block;
   font-size: 12px;
   font-weight: 600;
-  background-color: var(--accent-highlight);
-  color: var(--accent-highlight-ink);
+  background-color: var(--accent);
+  color: var(--primary-action-label);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   padding: 3px 12px;
@@ -1284,9 +1305,9 @@ body,
 .workflow-flow-tag {
   font-size: 12px;
   font-weight: 600;
-  color: var(--accent-highlight-ink);
-  background-color: var(--accent-highlight);
-  border: 1px solid var(--accent-highlight);
+  color: var(--accent);
+  background-color: var(--accent-subtle);
+  border: 1px solid rgba(46, 91, 255, 0.28);
   border-radius: var(--control-corner);
   padding: 4px 12px;
   font-variant-numeric: tabular-nums;
@@ -1313,7 +1334,7 @@ body,
 }
 
 .workflow-node.accent-node {
-  border-color: var(--accent-highlight);
+  border-color: var(--accent);
 }
 
 .workflow-node-top {
@@ -1339,9 +1360,9 @@ body,
 }
 
 .workflow-node.accent-node .workflow-node-step {
-  background-color: var(--accent-highlight);
-  border-color: var(--accent-highlight);
-  color: var(--accent-highlight-ink);
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--primary-action-label);
 }
 
 .workflow-node-role {
@@ -1380,7 +1401,7 @@ body,
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--accent-highlight);
+  color: var(--accent);
 }
 
 .workflow-arrow-svg {
@@ -1480,7 +1501,7 @@ body,
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--accent-highlight);
+  color: var(--accent);
 }
 
 .research-meta-value {
@@ -1513,8 +1534,8 @@ body,
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  background-color: var(--accent-highlight);
-  color: var(--accent-highlight-ink);
+  background-color: var(--accent);
+  color: var(--primary-action-label);
   border-radius: var(--control-corner);
   padding: 3px 10px;
   margin-bottom: 10px;
@@ -1649,9 +1670,9 @@ body,
 }
 
 .faq-item.open .faq-icon-pill {
-  background-color: var(--accent-highlight);
-  border-color: var(--accent-highlight);
-  color: var(--accent-highlight-ink);
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--primary-action-label);
 }
 
 .faq-answer {
