@@ -1,31 +1,44 @@
-# Python
+# Python & virtual environments
 __pycache__/
 *.py[cod]
-*.class
+*$py.class
 .venv/
 venv/
-ENV/
-.env
+env/
 
-# Node / Frontend
-node_modules/
-dist/
-dist-ssr/
-*.local
-.vite/
-
-# AI Model & Data (Large Files)
+# Model exports & large runtime media
 *.onnx
 best_openvino_model/
-backend/data/
-/samples/
 *.mp4
+*.avi
+*.mov
+*.mkv
 
-# Removing the heavy files from the repo
-frontend/node_modules/*
-/samples/*
-test/*
-backend/data/*
-backend/output/*
-!frontend/public/samples/
+# Structured raw datasets (keep empty folder placeholders tracked via .gitkeep)
+datasets/*/*/*
+!datasets/*/*/.gitkeep
+datasets/test/labels.cache
 
+# User drop folders (keep put_images_here & put_mp4_videos_here placeholders tracked)
+media/put_images_here/*
+!media/put_images_here/.gitkeep
+media/put_mp4_videos_here/*
+!media/put_mp4_videos_here/.gitkeep
+
+# Bulk generated training test predictions (keep results/ curves tracked; ignore 1,850 bulk JPGs)
+training/predictions/*
+!training/predictions/.gitkeep
+
+# Backend runtime uploads & outputs (keep folder structure tracked via .gitkeep)
+backend/data/*/*
+!backend/data/*/.gitkeep
+
+# Frontend build artifacts & dependencies
+frontend/node_modules/
+frontend/dist/
+
+# OS & IDE metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

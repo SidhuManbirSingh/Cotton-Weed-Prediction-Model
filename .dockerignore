@@ -12,9 +12,17 @@ venv
 frontend/node_modules
 frontend/dist
 
-# App Data (to prevent copying massive amounts of generated media during build)
-backend/data/*
-!backend/data/.gitkeep
+# Heavy datasets, user drop media, and runtime data
+datasets/*/*/*
+!datasets/*/*/.gitkeep
+media/put_images_here/*
+!media/put_images_here/.gitkeep
+media/put_mp4_videos_here/*
+!media/put_mp4_videos_here/.gitkeep
+training/predictions/*
+!training/predictions/.gitkeep
+backend/data/*/*
+!backend/data/*/.gitkeep
 
 # IDEs
 .idea
