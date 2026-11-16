@@ -222,7 +222,10 @@
                       Export YOLO Labels (.zip)
                     </button>
                   </div>
-                  <a href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing" target="_blank" rel="noreferrer" class="workbench-recovery-link">Public UAV Dataset Archive</a>
+                  <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
+                    <a href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing" target="_blank" rel="noopener noreferrer" class="workbench-recovery-link">Public UAV Dataset Archive</a>
+                    <a href="https://www.kaggle.com/datasets/manbirsinghsidhu/cotton-weed-dataset" target="_blank" rel="noopener noreferrer" class="workbench-recovery-link">Kaggle Dataset Mirror</a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -556,6 +559,7 @@
                 <a href="/Final_Report.pdf" target="_blank" rel="noreferrer" class="btn-pill btn-primary btn-sm">Read Final Report (PDF)</a>
                 <a href="https://github.com/SidhuManbirSingh/Cotton-Weed-Prediction-Model/" target="_blank" rel="noreferrer" class="btn-pill btn-secondary btn-sm">View GitHub Repository</a>
                 <a href="https://doi.org/10.17632/fwg6pt6ckd.1" target="_blank" rel="noreferrer" class="btn-pill btn-secondary btn-sm">Mendeley Dataset [15]</a>
+                <a href="https://www.kaggle.com/datasets/manbirsinghsidhu/cotton-weed-dataset" target="_blank" rel="noopener noreferrer" class="btn-pill btn-secondary btn-sm">Kaggle Dataset Mirror</a>
               </div>
             </div>
 
@@ -641,13 +645,14 @@
           <div class="faq-list">
             <div class="faq-item open">
               <button type="button" class="faq-trigger">
-                <span>Where can I download a sample drone .mp4 video for quick testing?</span>
+                <span>Where can I download a sample drone .mp4 video or dataset for quick testing?</span>
                 <span class="faq-icon-pill">×</span>
               </button>
               <div class="faq-answer">
-                You can download a sample cotton-field UAV test video directly from Google Drive and drop it into the Inference Studio upload box above to benchmark frame skipping and YOLOv8 overlay reconstruction right away:
-                <div style="margin-top: 10px;">
+                You can download a sample cotton-field UAV test video directly from Google Drive (and alternatively download the full labeled Cotton-Weed dataset mirror on Kaggle) to drop media into the Inference Studio upload box above:
+                <div style="margin-top: 10px; display: flex; gap: 16px; flex-wrap: wrap;">
                   <a href="[GOOGLE_DRIVE_MP4_LINK]" target="_blank" rel="noopener noreferrer" class="faq-inline-link">Download Sample Drone Test Video (.mp4)</a>
+                  <a href="https://www.kaggle.com/datasets/manbirsinghsidhu/cotton-weed-dataset" target="_blank" rel="noopener noreferrer" class="faq-inline-link">Download Cotton-Weed Dataset (Kaggle Mirror)</a>
                 </div>
               </div>
             </div>
@@ -767,6 +772,7 @@
             <div class="footer-col-heading">Model &amp; Data</div>
             <ul class="footer-link-list">
               <li><a href="https://doi.org/10.17632/fwg6pt6ckd.1" target="_blank" rel="noreferrer" class="footer-link">Mendeley UAV Dataset [15]</a></li>
+              <li><a href="https://www.kaggle.com/datasets/manbirsinghsidhu/cotton-weed-dataset" target="_blank" rel="noopener noreferrer" class="footer-link">Kaggle Dataset Mirror</a></li>
               <li><a href="#research" class="footer-link">YOLOv8n Benchmarks</a></li>
               <li><a href="#features" class="footer-link">OpenVINO Runtime</a></li>
               <li><a href="#features" class="footer-link">Validation Metrics</a></li>

@@ -4,6 +4,7 @@ const API = ''
 const GITHUB_REPO_URL = 'https://github.com/SidhuManbirSingh/Cotton-Weed-Prediction-Model/'
 const FINAL_REPORT_URL = '/Final_Report.pdf'
 const MENDELEY_DATASET_URL = 'https://doi.org/10.17632/fwg6pt6ckd.1'
+const KAGGLE_DATASET_URL = 'https://www.kaggle.com/datasets/manbirsinghsidhu/cotton-weed-dataset'
 const SAMPLE_MP4_DRIVE_URL = '[GOOGLE_DRIVE_MP4_LINK]'
 
 const FRAMEWORK_LINKS = [
@@ -877,14 +878,24 @@ export default function App() {
                           Export YOLO Labels (.zip)
                         </button>
                       </div>
-                      <a
-                        href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="workbench-recovery-link"
-                      >
-                        Public UAV Dataset Archive
-                      </a>
+                      <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <a
+                          href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="workbench-recovery-link"
+                        >
+                          Public UAV Dataset Archive
+                        </a>
+                        <a
+                          href={KAGGLE_DATASET_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="workbench-recovery-link"
+                        >
+                          Kaggle Dataset Mirror
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1181,6 +1192,9 @@ export default function App() {
                   <a href={MENDELEY_DATASET_URL} target="_blank" rel="noreferrer" className="btn-pill btn-secondary btn-sm">
                     Mendeley Dataset [15]
                   </a>
+                  <a href={KAGGLE_DATASET_URL} target="_blank" rel="noopener noreferrer" className="btn-pill btn-secondary btn-sm">
+                    Kaggle Dataset Mirror
+                  </a>
                 </div>
               </div>
 
@@ -1241,10 +1255,12 @@ export default function App() {
             <div className="faq-list">
               {[
                 {
-                  q: 'Where can I download a sample drone .mp4 video for quick testing?',
-                  a: 'You can download a sample cotton-field UAV test video directly from Google Drive and drop it into the Inference Studio upload box above to benchmark frame skipping and YOLOv8 overlay reconstruction right away:',
-                  linkHref: SAMPLE_MP4_DRIVE_URL,
-                  linkLabel: 'Download Sample Drone Test Video (.mp4)'
+                  q: 'Where can I download a sample drone .mp4 video or dataset for quick testing?',
+                  a: 'You can download a sample cotton-field UAV test video directly from Google Drive (and alternatively download the full labeled Cotton-Weed dataset mirror on Kaggle) to drop media into the Inference Studio upload box above:',
+                  links: [
+                    { href: SAMPLE_MP4_DRIVE_URL, label: 'Download Sample Drone Test Video (.mp4)' },
+                    { href: KAGGLE_DATASET_URL, label: 'Download Cotton-Weed Dataset (Kaggle Mirror)' },
+                  ],
                 },
                 {
                   q: 'How does CottonVision distinguish weed clusters from cotton plants?',
@@ -1286,16 +1302,19 @@ export default function App() {
                   {openFaqs[idx] && (
                     <div className="faq-answer">
                       {faq.a}
-                      {faq.linkHref && (
-                        <div style={{ marginTop: '10px' }}>
-                          <a
-                            href={faq.linkHref}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="faq-inline-link"
-                          >
-                            {faq.linkLabel}
-                          </a>
+                      {faq.links && (
+                        <div style={{ marginTop: '10px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                          {faq.links.map(link => (
+                            <a
+                              key={link.label}
+                              href={link.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="faq-inline-link"
+                            >
+                              {link.label}
+                            </a>
+                          ))}
                         </div>
                       )}
                     </div>
@@ -1414,6 +1433,7 @@ export default function App() {
               <div className="footer-col-heading">Model &amp; Data</div>
               <ul className="footer-link-list">
                 <li><a href={MENDELEY_DATASET_URL} target="_blank" rel="noreferrer" className="footer-link">Mendeley UAV Dataset [15]</a></li>
+                <li><a href={KAGGLE_DATASET_URL} target="_blank" rel="noopener noreferrer" className="footer-link">Kaggle Dataset Mirror</a></li>
                 <li><a href="#research" className="footer-link">YOLOv8n Benchmarks</a></li>
                 <li><a href="#features" className="footer-link">OpenVINO Runtime</a></li>
                 <li><a href="#features" className="footer-link">Validation Metrics</a></li>
