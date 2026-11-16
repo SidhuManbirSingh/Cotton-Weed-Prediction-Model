@@ -4,8 +4,21 @@ const API = ''
 const GITHUB_REPO_URL = 'https://github.com/SidhuManbirSingh/Cotton-Weed-Prediction-Model/'
 const FINAL_REPORT_URL = '/Final_Report.pdf'
 const MENDELEY_DATASET_URL = 'https://doi.org/10.17632/fwg6pt6ckd.1'
-const KAGGLE_DATASET_URL = 'https://www.kaggle.com/datasets/manbirsinghsidhu/cotton-weed-dataset'
+const KAGGLE_DATASET_URL = 'https://www.kaggle.com/datasets/manbirsinghsidhu/cotton-weed-dataset/'
 const SAMPLE_MP4_DRIVE_URL = '[GOOGLE_DRIVE_MP4_LINK]'
+
+const KaggleIcon = ({ size = 13, className = '' }) => (
+  <svg
+    width={className ? undefined : size}
+    height={className ? undefined : size}
+    className={className || undefined}
+    viewBox="0 0 24 24"
+    fill="#20BEFF"
+    aria-hidden="true"
+  >
+    <path d="M18.825 23.859c-.022.092-.117.141-.281.141h-3.139c-.187 0-.351-.082-.492-.248l-5.178-6.589-1.448 1.374v5.111c0 .235-.117.352-.351.352H5.505c-.236 0-.354-.117-.354-.352V.353c0-.233.118-.353.354-.353h2.431c.234 0 .351.12.351.353v14.343l6.203-6.272c.165-.165.33-.246.495-.246h3.239c.144 0 .236.06.285.18.046.149.034.255-.036.315l-6.555 6.344 6.836 8.507c.095.104.117.208.07.358z" />
+  </svg>
+)
 
 const FRAMEWORK_LINKS = [
   {
@@ -524,6 +537,17 @@ export default function App() {
               >
                 GitHub
               </a>
+              <a
+                href={KAGGLE_DATASET_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="site-nav-link"
+                title="Kaggle Dataset (Alternative to Google Drive)"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+              >
+                <KaggleIcon size={13} />
+                <span>Kaggle</span>
+              </a>
               <a href="#workbench" className="btn-pill btn-primary btn-sm">
                 Open Workbench
               </a>
@@ -571,6 +595,16 @@ export default function App() {
                 className="btn-pill btn-secondary btn-sm"
               >
                 GitHub Repository
+              </a>
+              <a
+                href={KAGGLE_DATASET_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-pill btn-secondary btn-sm"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <KaggleIcon size={13} />
+                <span>Kaggle Dataset (Alt. to Google Drive)</span>
               </a>
               <a href="#workbench" className="btn-pill btn-primary btn-sm" onClick={() => setMobileMenuOpen(false)}>
                 Launch Inference Studio
@@ -885,15 +919,17 @@ export default function App() {
                           rel="noopener noreferrer"
                           className="workbench-recovery-link"
                         >
-                          Public UAV Dataset Archive
+                          Public UAV Dataset Archive (Google Drive)
                         </a>
                         <a
                           href={KAGGLE_DATASET_URL}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="workbench-recovery-link"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                         >
-                          Kaggle Dataset Mirror
+                          <KaggleIcon size={13} />
+                          <span>Kaggle Dataset (Alternative to Google Drive)</span>
                         </a>
                       </div>
                     </div>
@@ -1192,8 +1228,15 @@ export default function App() {
                   <a href={MENDELEY_DATASET_URL} target="_blank" rel="noreferrer" className="btn-pill btn-secondary btn-sm">
                     Mendeley Dataset [15]
                   </a>
-                  <a href={KAGGLE_DATASET_URL} target="_blank" rel="noopener noreferrer" className="btn-pill btn-secondary btn-sm">
-                    Kaggle Dataset Mirror
+                  <a
+                    href={KAGGLE_DATASET_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-pill btn-secondary btn-sm"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <KaggleIcon size={13} />
+                    <span>Kaggle Dataset (Alt. to Google Drive)</span>
                   </a>
                 </div>
               </div>
@@ -1256,10 +1299,10 @@ export default function App() {
               {[
                 {
                   q: 'Where can I download a sample drone .mp4 video or dataset for quick testing?',
-                  a: 'You can download a sample cotton-field UAV test video directly from Google Drive (and alternatively download the full labeled Cotton-Weed dataset mirror on Kaggle) to drop media into the Inference Studio upload box above:',
+                  a: 'You can download a sample cotton-field UAV test video directly from Google Drive, or use Kaggle as an alternative to Google Drive for downloading the labeled Cotton-Weed dataset:',
                   links: [
                     { href: SAMPLE_MP4_DRIVE_URL, label: 'Download Sample Drone Test Video (.mp4)' },
-                    { href: KAGGLE_DATASET_URL, label: 'Download Cotton-Weed Dataset (Kaggle Mirror)' },
+                    { href: KAGGLE_DATASET_URL, label: 'Kaggle Dataset (Alternative to Google Drive)', icon: true },
                   ],
                 },
                 {
@@ -1303,7 +1346,7 @@ export default function App() {
                     <div className="faq-answer">
                       {faq.a}
                       {faq.links && (
-                        <div style={{ marginTop: '10px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                        <div style={{ marginTop: '10px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
                           {faq.links.map(link => (
                             <a
                               key={link.label}
@@ -1311,8 +1354,10 @@ export default function App() {
                               target="_blank"
                               rel="noopener noreferrer"
                               className="faq-inline-link"
+                              style={link.icon ? { display: 'inline-flex', alignItems: 'center', gap: '6px' } : undefined}
                             >
-                              {link.label}
+                              {link.icon && <KaggleIcon size={13} />}
+                              <span>{link.label}</span>
                             </a>
                           ))}
                         </div>
@@ -1360,6 +1405,16 @@ export default function App() {
               >
                 GitHub Repository
               </a>
+              <a
+                href={KAGGLE_DATASET_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-pill btn-inverse-secondary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <KaggleIcon size={13} />
+                <span>Kaggle Dataset (Alt. to Drive)</span>
+              </a>
             </div>
           </div>
         </div>
@@ -1400,6 +1455,17 @@ export default function App() {
                     <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
                   </svg>
                 </a>
+                {/* Kaggle */}
+                <a
+                  href={KAGGLE_DATASET_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer-social-link"
+                  aria-label="Kaggle Dataset (Alternative to Google Drive)"
+                  title="Kaggle Dataset (Alternative to Google Drive)"
+                >
+                  <KaggleIcon className="footer-social-icon" />
+                </a>
                 {/* YouTube Demo */}
                 <a
                   href="https://youtu.be/bO3l2jyvdKA"
@@ -1433,7 +1499,7 @@ export default function App() {
               <div className="footer-col-heading">Model &amp; Data</div>
               <ul className="footer-link-list">
                 <li><a href={MENDELEY_DATASET_URL} target="_blank" rel="noreferrer" className="footer-link">Mendeley UAV Dataset [15]</a></li>
-                <li><a href={KAGGLE_DATASET_URL} target="_blank" rel="noopener noreferrer" className="footer-link">Kaggle Dataset Mirror</a></li>
+                <li><a href={KAGGLE_DATASET_URL} target="_blank" rel="noopener noreferrer" className="footer-link">Kaggle Dataset (Alt. to Google Drive)</a></li>
                 <li><a href="#research" className="footer-link">YOLOv8n Benchmarks</a></li>
                 <li><a href="#features" className="footer-link">OpenVINO Runtime</a></li>
                 <li><a href="#features" className="footer-link">Validation Metrics</a></li>
