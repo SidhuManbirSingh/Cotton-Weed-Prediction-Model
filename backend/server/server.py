@@ -7,6 +7,7 @@ I don't have NVIDIA GPUs, so this is designed to run on CPU/GPU-agnostic OpenVIN
 """
 
 import io
+import json
 import os
 import shutil
 import threading
@@ -40,9 +41,12 @@ from backend.utils.path_manager import (
 )
 
 from backend.utils.file_naming import generate_timestamp
+from backend.utils.logger import get_logger, get_log_file_path
 from backend.scripts.video2image import extract_frames
-from backend.scripts.annotation  import annotate_frames, annotate_single_image
-from backend.scripts.convert      import images_to_video
+from backend.scripts.annotation  import annotate_frames, annotate_single_image, _DEFAULT_MODEL
+from backend.scripts.convert      import images_to_video, _find_ffmpeg
+
+logger = get_logger("server")
 
 # ---------------------------------------------------------------------------
 app = Flask(__name__) # Added __name__ for working in any name even if not run as main
@@ -65,14 +69,52 @@ _jobs_lock = threading.Lock()
 # Mutex Lock to ensure thread-safe access to the _jobs dictionary
 # I learned about this in the my professor course on Operating Systems COMP 340 
 
+def _safe_job_dir(job_id: str) -> Path | None:
+    """Resolve *job_id* directory under OUTPUT_DIR safely."""
+    clean_id = secure_filename(job_id)
+    if not clean_id or clean_id != job_id:
+        return None
+    candidate = (OUTPUT_DIR / clean_id).resolve()
+    if not str(candidate).startswith(str(OUTPUT_DIR.resolve())):
+        return None
+    return candidate
+
+
 def _set_job(job_id: str, status: str, message: str = "", result: dict = None, progress: dict = None):
+    payload = {
+        "status":   status,
+        "message":  message,
+        "result":   result or {},
+        "progress": progress or {},
+    }
     with _jobs_lock:
-        _jobs[job_id] = {
-            "status":   status,
-            "message":  message,
-            "result":   result or {},
-            "progress": progress or {},
-        }
+        _jobs[job_id] = payload
+    job_dir = _safe_job_dir(job_id)
+    if job_dir is not None:
+        job_dir.mkdir(parents=True, exist_ok=True)
+        (job_dir / "status.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+def _get_job(job_id: str) -> dict | None:
+    """Retrieve job status from memory or persisted status.json fallback."""
+    with _jobs_lock:
+        job = _jobs.get(job_id)
+    if job is not None:
+        return job
+    job_dir = _safe_job_dir(job_id)
+    if job_dir is None:
+        return None
+    status_file = job_dir / "status.json"
+    if not status_file.exists():
+        return None
+    try:
+        loaded = json.loads(status_file.read_text(encoding="utf-8"))
+        with _jobs_lock:
+            _jobs[job_id] = loaded
+        return loaded
+    except Exception as exc:
+        logger.warning("Failed reading persisted job status %s: %s", job_id, exc)
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -105,6 +147,7 @@ def upload():
     file.save(str(save_path))
 
     file_type = "video" if ext in ALLOWED_VIDEO_EXT else "image"
+    logger.info("Uploaded %s (%s, %d bytes) -> %s", filename, file_type, save_path.stat().st_size, save_path)
     return jsonify({
         "filename": filename,
         "type":     file_type,
@@ -133,8 +176,10 @@ def process_image():
     try:
         out_name = f"inference_{ts}_{nonce}_{upload_path.name}"
         out_path = OUTPUT_DIR / out_name
+        logger.info("Image inference started: %s (conf=%.2f)", upload_path.name, conf)
         res = annotate_single_image(str(upload_path), str(out_path), conf=conf)
         label_name = Path(res["label_path"]).name
+        logger.info("Image inference complete: %s -> %s", out_name, res.get("summary", {}))
 
         return jsonify({
             "annotated_url":  f"/api/media/output/{out_name}",
@@ -144,6 +189,7 @@ def process_image():
             "summary":        res.get("summary", {}),
         })
     except Exception as exc:
+        logger.exception("Image inference failed for %s", upload_path.name)
         return jsonify({"error": str(exc)}), 500 # 500 = Internal Server Error
 
 # For Video Processing, we have a more complex pipeline that involves multiple steps 
@@ -168,6 +214,7 @@ def process():
     # Unique Job ID is genberated
     job_id         = str(uuid.uuid4())
     _set_job(job_id, "queued", "Job queued")
+    logger.info("Queued video job %s: file=%s interval=%d conf=%.2f", job_id, filename, frame_interval, conf)
 
     t = threading.Thread(
         target=_run_pipeline, # _run_pipeline is expected to return the result of the video processing pipeline and update the job status accordingly. It takes the job_id, path to the uploaded video, frame interval, and confidence threshold as arguments.
@@ -180,32 +227,62 @@ def process():
 
 
 @app.route("/api/status/<job_id>", methods=["GET"])
-def status(job_id: str): # Just returns the current status of a job based on its ID, including progress and any results if available.  
-    with _jobs_lock:
-        job = _jobs.get(job_id)
-    if job is None: return jsonify({"error": "Unknown job"}), 404
+def status(job_id: str): # Just returns the current status of a job based on its ID, including progress and any results if available.
+    job = _get_job(job_id)
+    if job is None:
+        logger.warning("Status requested for unknown job: %s", job_id)
+        return jsonify({"error": "Unknown job"}), 404
     return jsonify({"job_id": job_id, **job}) # returns the job id and  whole job dict which has status, message, result, and progress keys in JSON format
+
+
+@app.route("/api/health", methods=["GET"])
+def health():
+    """Return backend health, model availability, and log path diagnostics."""
+    return jsonify({
+        "status": "ok",
+        "model_path": str(_DEFAULT_MODEL),
+        "model_exists": Path(_DEFAULT_MODEL).exists(),
+        "ffmpeg_available": _find_ffmpeg() is not None,
+        "log_file": str(get_log_file_path()),
+    })
+
+
+@app.route("/api/logs", methods=["GET"])
+def view_logs():
+    """Return recent lines from cottonvision.log for diagnostics."""
+    lines_requested = max(1, min(500, int(request.args.get("lines", 120))))
+    log_path = get_log_file_path()
+    if not log_path.exists():
+        return jsonify({"log_file": str(log_path), "lines": []})
+    all_lines = log_path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    return jsonify({"log_file": str(log_path), "lines": all_lines[-lines_requested:]})
 
 
 # For the image and videos access or viewing, we have a media endpoint that serves files from the data directory.
 @app.route("/api/media/<path:filepath>", methods=["GET"])
 def media(filepath: str):
-    """Serve media files (images, videos) from data directory."""
-    full_path = _BACKEND_DIR / "data" / filepath
-    if not full_path.exists():
+    """Serve media files (images, videos) from data directory with byte-range support."""
+    base_dir = DATA_DIR.resolve()
+    full_path = (base_dir / filepath).resolve()
+    if not str(full_path).startswith(str(base_dir)):
+        logger.warning("Blocked directory traversal on /api/media: %s", filepath)
+        abort(403)
+    if not full_path.exists() or not full_path.is_file():
+        logger.warning("Media not found: %s", full_path)
         abort(404)
 
     ext = full_path.suffix.lower()
     if ext in ('.mp4', '.avi', '.mov', '.mkv'):
-        return send_file(str(full_path), mimetype='video/mp4')
-    return send_file(str(full_path))
+        return send_file(str(full_path), mimetype='video/mp4', conditional=True)
+    if ext == '.webm':
+        return send_file(str(full_path), mimetype='video/webm', conditional=True)
+    return send_file(str(full_path), conditional=True)
 
 # Fow downlaoding the paired YOLO dataset for a specific job, we have an endpoint that dynamically zips the dataset directory and serves it as a downloadable file.
 @app.route("/api/download/dataset/<job_id>", methods=["GET"])
 def download_dataset(job_id: str):
     """Dynamically zip and download the paired YOLO dataset for a job."""
-    with _jobs_lock:
-        job = _jobs.get(job_id)
+    job = _get_job(job_id)
     if job is None or job["status"] != "done": return abort(404)
     # On demand zipping of the dataset directory for the specified job. It checks if the job exists and is marked as "done". If not, it returns a 404 error. If the job is valid, it retrieves the dataset directory path from the job's result, creates an in-memory zip file of the dataset, and sends it as a downloadable response to the client.
     dataset_dir = job.get("result", {}).get("dataset_dir")
@@ -276,31 +353,25 @@ def download_folder(folder_name: str):
 def _run_pipeline(job_id: str, video_path: str, frame_interval: int, conf: float):
     try:
         ts = generate_timestamp()
-
-        # Overall Pipeline Steps:
-        # 1. Extract frames from the uploaded video at the specified interval.
-        # 2. Annotate the extracted frames using the specified confidence threshold, and export the paired YOLO dataset (images + labels).
-        # 3. Rebuild the annotated frames into a web-optimized video using H.264 encoding via ffmpeg.
-        # 4. Generate a snapshot image from the first annotated frame for quick preview.
-        # 5. Update the job
+        logger.info("Job %s started | video=%s | frame_interval=%d | conf=%.2f",
+                    job_id, video_path, frame_interval, conf)
 
         # Step 1 – Extract
-        _set_job(job_id, "running", "Extracting frames…", progress={"step": "extracting", "percent": 0})
+        _set_job(job_id, "running", "Extracting frames...", progress={"step": "extracting", "percent": 0})
         frames_dir = get_frames_path(ts)
         info = extract_frames(video_path, str(frames_dir), frame_interval=frame_interval)
         saved_count, source_fps = info["saved_count"], info["source_fps"]
-
-        # getting the frames inside of the frame directory and counting them
-
+        logger.info("Job %s Step 1 done | extracted=%d source_fps=%.2f dir=%s",
+                    job_id, saved_count, source_fps, frames_dir)
+        if saved_count == 0:
+            raise RuntimeError("No frames could be extracted from the uploaded video.")
 
         # Step 2 – Annotate + Dataset Export
-        _set_job(job_id, "running", "Analyzing frames (GPU acceleration enabled)…",
+        _set_job(job_id, "running", "Analyzing frames (YOLOv8 inference)...",
                  progress={"step": "annotating", "current": 0, "total": saved_count, "percent": 0})
-        
+
         annotated_dir = get_annotated_path(ts)
         dataset_dir   = get_job_dataset_path(job_id)
-
-        # annotate_frames is expected to process all the extracted frames, save the annotated images to the annotated_dir, and export the corresponding YOLO label files to the dataset_dir. 
 
         def on_progress(current, total):
             pct = int(current / total * 100) if total else 0
@@ -311,25 +382,30 @@ def _run_pipeline(job_id: str, video_path: str, frame_interval: int, conf: float
         annotate_frames(str(frames_dir), str(annotated_dir), conf=conf,
                         progress_callback=on_progress, dataset_dir=str(dataset_dir),
                         summary_out=pipeline_summary)
+        logger.info("Job %s Step 2 done | summary=%s", job_id, pipeline_summary)
 
-        # Step 3 – Rebuild Video (H.264 via ffmpeg)
-        _set_job(job_id, "running", "Building web-optimized video…", progress={"step": "converting", "percent": 95})
+        # Step 3 – Rebuild Video (H.264 browser-playable MP4)
+        _set_job(job_id, "running", "Building web-optimized H.264 video...",
+                 progress={"step": "converting", "percent": 95})
         output_path = get_output_video_path(job_id, ts)
         target_fps  = source_fps / (frame_interval if frame_interval > 0 else 1)
-        images_to_video(str(annotated_dir), str(output_path), fps=target_fps)
+        out_video_path = Path(images_to_video(str(annotated_dir), str(output_path), fps=target_fps))
+        logger.info("Job %s Step 3 done | video=%s (%d bytes) @ %.2f FPS",
+                    job_id, out_video_path.name, out_video_path.stat().st_size, target_fps)
 
-        # Snapshot: representative frame
+        # Snapshot: representative annotated frame
         snapshot_name = None
-        first_annotated = sorted(annotated_dir.iterdir())
+        first_annotated = sorted(
+            p for p in annotated_dir.iterdir()
+            if p.is_file() and p.suffix.lower() in ALLOWED_IMAGE_EXT
+        )
         if first_annotated:
             snapshot_name = f"snapshot_{ts}.jpg"
             snapshot_dst  = get_job_output_path(job_id) / snapshot_name
             shutil.copy2(str(first_annotated[0]), str(snapshot_dst))
 
-        # Handshake Result (Task 1: labels_url)
-        # We serve job-id subfolders via /api/media/output/<job_id>/<file>
         result = {
-            "output_video_url": f"/api/media/output/{job_id}/{output_path.name}",
+            "output_video_url": f"/api/media/output/{job_id}/{out_video_path.name}",
             "snapshot_url":     f"/api/media/output/{job_id}/{snapshot_name}" if snapshot_name else None,
             "labels_url":       f"/api/download/dataset/{job_id}",
             "dataset_dir":      str(dataset_dir),
@@ -337,12 +413,14 @@ def _run_pipeline(job_id: str, video_path: str, frame_interval: int, conf: float
             "total_frames":     saved_count,
             "summary":          pipeline_summary,
         }
-        _set_job(job_id, "done", "Done! Result ready for download.", result,
+        _set_job(job_id, "done", "Done! Result ready.", result,
                  progress={"step": "done", "percent": 100, "current": saved_count, "total": saved_count})
+        logger.info("Job %s completed | output_video_url=%s | snapshot_url=%s",
+                    job_id, result["output_video_url"], result["snapshot_url"])
 
     except Exception as exc:
+        logger.exception("Job %s failed in pipeline", job_id)
         _set_job(job_id, "error", str(exc))
-        raise
 
 # ---------------------------------------------------------------------------
 # Frontend static file serving
@@ -395,4 +473,5 @@ def serve_final_report():
 
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    logger.info("Starting CottonVision Flask server on http://0.0.0.0:5000 (logs: %s)", get_log_file_path())
+    app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)

@@ -13,9 +13,18 @@ Usage (import):
 
 import cv2
 import os
+import sys
 import argparse
 import hashlib
 from pathlib import Path
+
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
+from backend.utils.logger import get_logger  # noqa: E402
+
+logger = get_logger("video2image")
 
 
 def _frame_hash(frame) -> str:
@@ -58,10 +67,8 @@ def extract_frames(
 
     source_fps   = cap.get(cv2.CAP_PROP_FPS) or 30.0
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    print(f"[video2image] Source  : {video_path}")
-    print(f"[video2image] Output  : {output_folder}")
-    print(f"[video2image] FPS     : {source_fps:.2f}  |  Total frames: {total_frames}")
-    print(f"[video2image] Interval: every {frame_interval} frame(s)")
+    logger.info("Extracting frames: source=%s | output=%s | fps=%.2f | total_frames=%d | interval=%d",
+                video_path, output_folder, source_fps, total_frames, frame_interval)
 
     frame_count = 0
     saved_count = 0
@@ -85,12 +92,12 @@ def extract_frames(
             saved_count += 1
 
             if saved_count % 100 == 0:
-                print(f"[video2image] Saved {saved_count} frames so far…")
+                logger.info("Saved %d frames so far...", saved_count)
 
         frame_count += 1
 
     cap.release()
-    print(f"[video2image] Done — extracted {saved_count} frame(s) to '{output_folder}'")
+    logger.info("Extracted %d frame(s) to '%s'", saved_count, output_folder)
     return {
         "saved_count":  saved_count,
         "source_fps":   source_fps,

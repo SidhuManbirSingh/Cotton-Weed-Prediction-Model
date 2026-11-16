@@ -1,12 +1,13 @@
 """
 convert.py
 ----------
-Assembles frame images into an MP4 video.
+Assembles frame images into a browser-compatible MP4 video.
 
 Two-pass encoding:
-  1. OpenCV writes raw mp4v frames to a temporary .mp4 file
-  2. ffmpeg re-encodes to H.264 (libx264) with -movflags +faststart when available,
-     or falls back cleanly to the OpenCV mp4v file.
+  1. OpenCV writes frames using H.264 (avc1/H264) when supported, falling back to mp4v.
+  2. If ffmpeg is available (system PATH or imageio-ffmpeg), re-encodes with libx264
+     + -movflags +faststart for instant web seeking; otherwise keeps Pass 1 output when
+     already H.264 or logs a fallback warning for mp4v.
 
 Usage (CLI):
     python convert.py --input <images_dir> --output <output.mp4_or_dir> [--fps 30] [--speed 1.0]
@@ -19,12 +20,21 @@ Usage (import):
 import argparse
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import cv2
 import numpy as np
 
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
+from backend.utils.logger import get_logger  # noqa: E402
+
+logger = get_logger("convert")
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp"}
+_H264_CODECS = {"avc1", "h264"}
 
 
 def _resolve_output_path(output_path: str | Path, input_dir: Path) -> Path:
@@ -72,6 +82,59 @@ def _find_ffmpeg() -> str | None:
         return None
 
 
+def _read_video_fourcc(video_path: Path) -> str:
+    """Inspect written video FourCC string using OpenCV."""
+    cap = cv2.VideoCapture(str(video_path))
+    try:
+        if not cap.isOpened():
+            return "unreadable"
+        fc = int(cap.get(cv2.CAP_PROP_FOURCC))
+        return "".join(chr((fc >> (8 * i)) & 0xFF) for i in range(4)).strip() or "unknown"
+    finally:
+        cap.release()
+
+
+def _write_with_codecs(
+    images: list[Path],
+    raw_path: Path,
+    fps: float,
+    width: int,
+    height: int,
+    repeat: int,
+) -> tuple[str, int]:
+    """Try H.264 OpenCV codecs first, then mp4v fallback; return (codec_used, written_count)."""
+    last_err = "no supported OpenCV video codec opened"
+    for codec in ("avc1", "H264", "mp4v"):
+        raw_path.unlink(missing_ok=True)
+        fourcc = cv2.VideoWriter_fourcc(*codec)
+        writer = cv2.VideoWriter(str(raw_path), fourcc, fps, (width, height))
+        if not writer.isOpened():
+            writer.release()
+            last_err = f"VideoWriter failed to open codec '{codec}'"
+            continue
+
+        written = 0
+        try:
+            for img_path in images:
+                frame = cv2.imread(str(img_path))
+                if frame is None:
+                    logger.warning("Skipping unreadable image: %s", img_path.name)
+                    continue
+                fitted = _fit_frame_to_canvas(frame, width, height)
+                for _ in range(repeat):
+                    writer.write(fitted)
+                written += 1
+        finally:
+            writer.release()
+
+        if written > 0 and raw_path.exists() and raw_path.stat().st_size > 0:
+            return codec, written
+
+        last_err = f"Codec '{codec}' produced empty output"
+
+    raise RuntimeError(f"Failed to encode video to {raw_path}: {last_err}")
+
+
 def images_to_video(
     input_dir: str,
     output_path: str,
@@ -116,49 +179,32 @@ def images_to_video(
         raise RuntimeError(f"Failed to read first image: {images[0]}")
 
     raw_h, raw_w = first_frame.shape[:2]
-    # Ensure even dimensions for H.264 / yuv420p and broad MP4 player compatibility.
+    # Even dimensions are required by yuv420p H.264 encoders.
     width = raw_w + (raw_w % 2)
     height = raw_h + (raw_h % 2)
     repeat = max(1, int(round(1.0 / speed_factor)))
 
-    # --- Pass 1: OpenCV raw mp4v ---
     raw_path = out_file.with_name(f"raw_{out_file.name}")
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    writer = cv2.VideoWriter(str(raw_path), fourcc, fps, (width, height))
-    if not writer.isOpened():
-        writer.release()
-        raise RuntimeError(f"Failed to initialize OpenCV VideoWriter for: {raw_path}")
+    logger.info(
+        "Pass 1 encoding started: input=%s (%d images) -> output=%s (%dx%d @ %.2f FPS, repeat=%dx)",
+        in_dir, len(images), out_file, width, height, fps, repeat,
+    )
 
-    print("[convert] Pass 1 - OpenCV raw write")
-    print(f"[convert] Input   : {in_dir}  ({len(images)} images)")
-    print(f"[convert] Output  : {out_file}  ({width}x{height})")
-    print(f"[convert] FPS={fps}  speed_factor={speed_factor}  repeat={repeat}x")
+    codec_used, written = _write_with_codecs(images, raw_path, fps, width, height, repeat)
+    actual_fourcc = _read_video_fourcc(raw_path)
+    logger.info(
+        "Pass 1 complete: wrote %d frames with codec=%s (fourcc=%s, size=%d bytes)",
+        written, codec_used, actual_fourcc, raw_path.stat().st_size,
+    )
 
-    written = 0
-    try:
-        for img_path in images:
-            frame = cv2.imread(str(img_path))
-            if frame is None:
-                print(f"[convert] WARNING: skipping unreadable image: {img_path.name}")
-                continue
-            fitted = _fit_frame_to_canvas(frame, width, height)
-            for _ in range(repeat):
-                writer.write(fitted)
-            written += 1
-    finally:
-        writer.release()
-
-    if written == 0 or not raw_path.exists():
-        raise RuntimeError(f"No frames were written to intermediate video: {raw_path}")
-
-    print(f"[convert] Pass 1 done - wrote {written} frames -> '{raw_path}'")
-
-    # --- Pass 2: ffmpeg H.264 re-encode ---
     ffmpeg_bin = _find_ffmpeg()
     if not ffmpeg_bin:
-        print("[convert] WARNING: ffmpeg not found; using OpenCV mp4v output")
+        if codec_used.lower() in _H264_CODECS or actual_fourcc.lower() in _H264_CODECS:
+            logger.info("ffmpeg not installed; keeping browser-playable OpenCV H.264 (%s) output", actual_fourcc)
+        else:
+            logger.warning("ffmpeg not installed and OpenCV fell back to %s (may not play inline in browser)", actual_fourcc)
         raw_path.replace(out_file)
-        print(f"[convert] Done -> '{out_file}'")
+        logger.info("Final video written: %s (%d bytes)", out_file, out_file.stat().st_size)
         return str(out_file.resolve())
 
     ffmpeg_cmd = [
@@ -171,8 +217,7 @@ def images_to_video(
         "-movflags", "+faststart",
         str(out_file),
     ]
-    print("[convert] Pass 2 - ffmpeg H.264 re-encode")
-    print(f"[convert] Command : {' '.join(ffmpeg_cmd)}")
+    logger.info("Pass 2 ffmpeg H.264 +faststart re-encode: %s", " ".join(ffmpeg_cmd))
 
     result = subprocess.run(
         ffmpeg_cmd,
@@ -181,14 +226,17 @@ def images_to_video(
         timeout=600,
     )
     if result.returncode != 0:
-        print(f"[convert] WARNING: ffmpeg failed (exit {result.returncode}); keeping mp4v output")
-        if result.stderr:
-            print(f"[convert] ffmpeg stderr: {result.stderr[-400:]}")
+        logger.warning(
+            "ffmpeg exited %d (%s); falling back to Pass 1 output (fourcc=%s)",
+            result.returncode,
+            (result.stderr or "").strip()[-300:],
+            actual_fourcc,
+        )
         raw_path.replace(out_file)
         return str(out_file.resolve())
 
     raw_path.unlink(missing_ok=True)
-    print(f"[convert] Pass 2 done - H.264 video -> '{out_file}'")
+    logger.info("Pass 2 complete: H.264 video -> %s (%d bytes)", out_file, out_file.stat().st_size)
     return str(out_file.resolve())
 
 

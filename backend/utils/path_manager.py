@@ -9,11 +9,12 @@ UPLOADS_DIR   = DATA_DIR / "uploads"
 FRAMES_DIR    = DATA_DIR / "frames"
 ANNOTATED_DIR = DATA_DIR / "annotated"
 OUTPUT_DIR    = DATA_DIR / "output"
+LOGS_DIR      = DATA_DIR / "logs"
 
 
 def ensure_dirs():
     """Create all base data directories if they don't exist."""
-    for d in [UPLOADS_DIR, FRAMES_DIR, ANNOTATED_DIR, OUTPUT_DIR]:
+    for d in [UPLOADS_DIR, FRAMES_DIR, ANNOTATED_DIR, OUTPUT_DIR, LOGS_DIR]:
         d.mkdir(parents=True, exist_ok=True)
 
 

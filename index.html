@@ -877,17 +877,44 @@
       legendCaptionEl.appendChild(cSpan);
     }
 
-    function setMediaMode(isVideo, rawSrc, annotatedSrc) {
+    let activeAnnotatedFallback = null;
+
+    rawVideoEl.addEventListener('error', () => {
+      if (rawVideoEl.style.display === 'none') return;
+      rawMetaDetailEl.textContent = (rawMetaDetailEl.textContent || 'Video') + ' (Browser cannot preview raw codec; AI H.264 output will render on right)';
+    });
+
+    annotatedVideoEl.addEventListener('error', () => {
+      if (annotatedVideoEl.style.display === 'none' || !activeAnnotatedFallback) return;
+      annotatedVideoEl.style.display = 'none';
+      annotatedImgEl.style.display = 'block';
+      annotatedImgEl.src = activeAnnotatedFallback;
+      statsCaptionEl.textContent = (statsCaptionEl.textContent || '') + ' · Showing snapshot (use Download MP4)';
+    });
+
+    function setMediaMode(isVideo, rawSrc, annotatedSrc, posterUrl = '') {
+      activeAnnotatedFallback = posterUrl || null;
       if (isVideo) {
         rawImgEl.style.display = 'none';
         annotatedImgEl.style.display = 'none';
         rawVideoEl.style.display = 'block';
         annotatedVideoEl.style.display = 'block';
-        rawVideoEl.src = rawSrc;
-        annotatedVideoEl.src = annotatedSrc || rawSrc;
+        if (rawVideoEl.getAttribute('src') !== rawSrc) {
+          rawVideoEl.src = rawSrc;
+          rawVideoEl.load();
+        }
+        annotatedVideoEl.poster = posterUrl || '';
+        if (annotatedSrc && annotatedVideoEl.getAttribute('src') !== annotatedSrc) {
+          annotatedVideoEl.src = annotatedSrc;
+          annotatedVideoEl.load();
+          annotatedVideoEl.play().catch(() => {});
+        }
       } else {
         rawVideoEl.style.display = 'none';
         annotatedVideoEl.style.display = 'none';
+        rawVideoEl.removeAttribute('src');
+        annotatedVideoEl.removeAttribute('src');
+        annotatedVideoEl.poster = '';
         rawImgEl.style.display = 'block';
         annotatedImgEl.style.display = 'block';
         rawImgEl.src = rawSrc;
@@ -1086,6 +1113,9 @@
             try {
               const stRes = await fetch('/api/status/' + encodeURIComponent(vidData.job_id));
               const stData = await stRes.json();
+              if (!stRes.ok) {
+                throw new Error(stData.error || 'Video job status returned HTTP ' + stRes.status);
+              }
               const pct = (stData.progress && stData.progress.percent != null) ? stData.progress.percent : 40;
               setPipelineProgress(true, stData.message || 'Processing frames...', pct);
               statsCaptionEl.textContent = stData.message || 'Processing video...';
@@ -1093,8 +1123,11 @@
               if (stData.status === 'done') {
                 clearInterval(activePollTimer);
                 activePollTimer = null;
-                setPipelineProgress(false, '', 0);
-                setMediaMode(true, objUrl, stData.result.output_video_url);
+                setPipelineProgress(true, 'Inference complete', 100);
+                setTimeout(() => setPipelineProgress(false, '', 0), 900);
+                const snapUrl = stData.result.snapshot_url ? stData.result.snapshot_url + '?t=' + Date.now() : '';
+                const videoOutUrl = stData.result.output_video_url + '?t=' + Date.now();
+                setMediaMode(true, objUrl, videoOutUrl, snapUrl);
                 const formatted = formatLiveSummary(stData.result.summary);
                 renderLegend(formatted.weed, formatted.cotton);
                 statsCaptionEl.textContent = formatted.stats + ' · ' + (stData.result.total_frames || 0) + ' frames';

@@ -427,12 +427,13 @@ export default function App() {
         setJobStatus('queued')
         setJobMsg('Flight video queued for YOLOv8 processing...')
 
-        // Poll job
-        if (pollRef.current) clearInterval(pollRef.current)
         pollRef.current = setInterval(async () => {
           try {
             const stRes = await fetch(`${API}/api/status/${vidData.job_id}`)
             const stData = await stRes.json()
+            if (!stRes.ok) {
+              throw new Error(stData.error || `Job status HTTP ${stRes.status}`)
+            }
             setJobStatus(stData.status)
             setJobMsg(stData.message || '')
             setJobProgress(stData.progress || {})
@@ -440,7 +441,7 @@ export default function App() {
             if (stData.status === 'done') {
               clearInterval(pollRef.current)
               setIsProcessing(false)
-              setCustomAnnotated(`${API}${stData.result.output_video_url}`)
+              setCustomAnnotated(`${API}${stData.result.output_video_url}?t=${Date.now()}`)
               setCustomSummary(stData.result.summary || null)
               setJobResult(stData.result)
               setShowModal(true)
@@ -451,7 +452,12 @@ export default function App() {
               setInferenceError(stData.message || 'Video processing error')
               toast(`Processing error: ${stData.message}`, 'error')
             }
-          } catch (_) {}
+          } catch (pollErr) {
+            clearInterval(pollRef.current)
+            setIsProcessing(false)
+            setInferenceError(pollErr.message || 'Status polling failed')
+            toast(`Polling failed: ${pollErr.message || 'Server unreachable'}`, 'error')
+          }
         }, 1200)
       }
     } catch (err) {
@@ -730,7 +736,7 @@ export default function App() {
                         </div>
                         <div className="workbench-viewport">
                           {currentView.isVideo ? (
-                            <video src={currentView.raw} controls playsInline className="workbench-media" />
+                            <video key={currentView.raw} src={currentView.raw} controls muted playsInline autoPlay className="workbench-media" />
                           ) : (
                             <img src={currentView.raw} alt="Original UAV aerial view" className="workbench-media" />
                           )}
@@ -749,7 +755,16 @@ export default function App() {
                         </div>
                         <div className="workbench-viewport">
                           {currentView.isVideo ? (
-                            <video src={currentView.annotated} controls playsInline className="workbench-media" />
+                            <video
+                              key={currentView.annotated}
+                              src={currentView.annotated}
+                              poster={jobResult?.snapshot_url ? `${API}${jobResult.snapshot_url}` : undefined}
+                              controls
+                              muted
+                              playsInline
+                              autoPlay
+                              className="workbench-media"
+                            />
                           ) : (
                             <img src={currentView.annotated} alt="YOLOv8 annotated UAV view" className="workbench-media" />
                           )}

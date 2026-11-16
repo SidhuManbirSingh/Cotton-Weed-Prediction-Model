@@ -10,12 +10,20 @@ Task 2: Hardware Acceleration (Intel Arc GPU)
 """
 
 import os
+import sys
 import argparse
 import cv2
 import threading
 import time
 from pathlib import Path
 
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
+from backend.utils.logger import get_logger  # noqa: E402
+
+logger = get_logger("annotation")
 _YOLO_AVAILABLE = False
 _model_lock = threading.Lock()
 
@@ -42,7 +50,7 @@ def _get_model(model_path: str):
         raise ImportError("ultralytics is not installed. Run: pip install ultralytics")
     
     if model_path not in _model_cache:
-        print(f"[annotation] Loading model: {model_path}")
+        logger.info("Loading YOLO model: %s", model_path)
         # If it's a directory (OpenVINO), we specify the task
         if Path(model_path).is_dir():
             _model_cache[model_path] = YOLO(model_path, task='detect')
@@ -170,7 +178,7 @@ def annotate_frames(
     used_device = device
 
     total = len(image_files)
-    print(f"[annotation] Model: {model_path} | Device: {device or 'Auto'}")
+    logger.info("Annotating %d frames | model=%s | device=%s", total, model_path, device or "Auto")
 
     counts: dict = {}
     conf_sums: dict = {}
@@ -197,18 +205,21 @@ def annotate_frames(
 
         count += 1
         if progress_callback: progress_callback(count, total)
-        if count % 50 == 0: print(f"[annotation] {count}/{total} frames…")
+        if count % 50 == 0:
+            logger.info("Annotated %d/%d frames", count, total)
 
+    elapsed_ms = int((time.perf_counter() - t0) * 1000)
+    built_summary = _build_summary(
+        counts,
+        conf_sums,
+        elapsed_ms,
+        model_path,
+        _resolve_device_label(model_path, used_device),
+        frame_count=count,
+    )
+    logger.info("Batch annotation finished: %s", built_summary)
     if isinstance(summary_out, dict):
-        elapsed_ms = int((time.perf_counter() - t0) * 1000)
-        summary_out.update(_build_summary(
-            counts,
-            conf_sums,
-            elapsed_ms,
-            model_path,
-            _resolve_device_label(model_path, used_device),
-            frame_count=count,
-        ))
+        summary_out.update(built_summary)
 
     return count
 
