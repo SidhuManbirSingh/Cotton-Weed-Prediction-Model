@@ -1456,7 +1456,7 @@ export default function App() {
                 </a>
                 {/* YouTube Demo */}
                 <a
-                  href="https://youtu.be/bO3l2jyvdKA"
+                  href="https://youtu.be/la-q3xFH8cA"
                   target="_blank"
                   rel="noreferrer"
                   className="footer-social-link"
@@ -1503,7 +1503,7 @@ export default function App() {
                 <li><a href="#workflow" className="footer-link">Single-Command run.bat</a></li>
                 <li><a href="#faq" className="footer-link">H.264 Playback Fix</a></li>
                 <li><a href="#features" className="footer-link">Temporal Sync Math</a></li>
-                <li><a href="https://youtu.be/bO3l2jyvdKA" target="_blank" rel="noreferrer" className="footer-link">Video Walkthrough</a></li>
+                <li><a href="https://youtu.be/la-q3xFH8cA" target="_blank" rel="noreferrer" className="footer-link">Video Walkthrough</a></li>
               </ul>
             </div>
           </div>
