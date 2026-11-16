@@ -5,7 +5,6 @@ const GITHUB_REPO_URL = 'https://github.com/SidhuManbirSingh/Cotton-Weed-Predict
 const FINAL_REPORT_URL = '/Final_Report.pdf'
 const MENDELEY_DATASET_URL = 'https://doi.org/10.17632/fwg6pt6ckd.1'
 const KAGGLE_DATASET_URL = 'https://www.kaggle.com/datasets/manbirsinghsidhu/cotton-weed-dataset/'
-const SAMPLE_MP4_DRIVE_URL = '[GOOGLE_DRIVE_MP4_LINK]'
 
 const KaggleIcon = ({ size = 13, className = '' }) => (
   <svg
@@ -542,7 +541,7 @@ export default function App() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="site-nav-link"
-                title="Kaggle Dataset (Alternative to Google Drive)"
+                title="Kaggle Cotton-Weed Dataset"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
                 <KaggleIcon size={13} />
@@ -604,7 +603,7 @@ export default function App() {
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
                 <KaggleIcon size={13} />
-                <span>Kaggle Dataset (Alt. to Google Drive)</span>
+                <span>Kaggle Dataset</span>
               </a>
               <a href="#workbench" className="btn-pill btn-primary btn-sm" onClick={() => setMobileMenuOpen(false)}>
                 Launch Inference Studio
@@ -912,26 +911,16 @@ export default function App() {
                           Export YOLO Labels (.zip)
                         </button>
                       </div>
-                      <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center' }}>
-                        <a
-                          href="https://drive.google.com/drive/folders/1rnBnCmXL_B9jeZK325pCOdOYbs2EzgAg?usp=sharing"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="workbench-recovery-link"
-                        >
-                          Public UAV Dataset Archive (Google Drive)
-                        </a>
-                        <a
-                          href={KAGGLE_DATASET_URL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="workbench-recovery-link"
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
-                        >
-                          <KaggleIcon size={13} />
-                          <span>Kaggle Dataset (Alternative to Google Drive)</span>
-                        </a>
-                      </div>
+                      <a
+                        href={KAGGLE_DATASET_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="workbench-recovery-link"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                      >
+                        <KaggleIcon size={13} />
+                        <span>Kaggle Dataset</span>
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -1236,7 +1225,7 @@ export default function App() {
                     style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   >
                     <KaggleIcon size={13} />
-                    <span>Kaggle Dataset (Alt. to Google Drive)</span>
+                    <span>Kaggle Dataset</span>
                   </a>
                 </div>
               </div>
@@ -1298,11 +1287,10 @@ export default function App() {
             <div className="faq-list">
               {[
                 {
-                  q: 'Where can I download a sample drone .mp4 video or dataset for quick testing?',
-                  a: 'You can download a sample cotton-field UAV test video directly from Google Drive, or use Kaggle as an alternative to Google Drive for downloading the labeled Cotton-Weed dataset:',
+                  q: 'Where can I download the Cotton-Weed UAV dataset for quick testing?',
+                  a: 'You can download the labeled Cotton-Weed UAV dataset directly from Kaggle and drop test imagery or flight videos into the Inference Studio upload box above to benchmark frame skipping and YOLOv8 detection:',
                   links: [
-                    { href: SAMPLE_MP4_DRIVE_URL, label: 'Download Sample Drone Test Video (.mp4)' },
-                    { href: KAGGLE_DATASET_URL, label: 'Kaggle Dataset (Alternative to Google Drive)', icon: true },
+                    { href: KAGGLE_DATASET_URL, label: 'Download Cotton-Weed Dataset (Kaggle)', icon: true },
                   ],
                 },
                 {
@@ -1413,7 +1401,7 @@ export default function App() {
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
                 <KaggleIcon size={13} />
-                <span>Kaggle Dataset (Alt. to Drive)</span>
+                <span>Kaggle Dataset</span>
               </a>
             </div>
           </div>
@@ -1461,8 +1449,8 @@ export default function App() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="footer-social-link"
-                  aria-label="Kaggle Dataset (Alternative to Google Drive)"
-                  title="Kaggle Dataset (Alternative to Google Drive)"
+                  aria-label="Kaggle Cotton-Weed Dataset"
+                  title="Kaggle Cotton-Weed Dataset"
                 >
                   <KaggleIcon className="footer-social-icon" />
                 </a>
@@ -1499,7 +1487,7 @@ export default function App() {
               <div className="footer-col-heading">Model &amp; Data</div>
               <ul className="footer-link-list">
                 <li><a href={MENDELEY_DATASET_URL} target="_blank" rel="noreferrer" className="footer-link">Mendeley UAV Dataset [15]</a></li>
-                <li><a href={KAGGLE_DATASET_URL} target="_blank" rel="noopener noreferrer" className="footer-link">Kaggle Dataset (Alt. to Google Drive)</a></li>
+                <li><a href={KAGGLE_DATASET_URL} target="_blank" rel="noopener noreferrer" className="footer-link">Kaggle Dataset</a></li>
                 <li><a href="#research" className="footer-link">YOLOv8n Benchmarks</a></li>
                 <li><a href="#features" className="footer-link">OpenVINO Runtime</a></li>
                 <li><a href="#features" className="footer-link">Validation Metrics</a></li>
