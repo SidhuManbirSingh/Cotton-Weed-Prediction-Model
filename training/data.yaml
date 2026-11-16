@@ -1,0 +1,9 @@
+# YOLOv8 Dataset Configuration — CottonVision
+# Place split image/label pairs inside ./datasets/ before training or evaluation.
+path: datasets
+train: train/images
+val: val/images
+test: test/images
+
+nc: 2
+names: ['weed', 'cotton']
