@@ -27,7 +27,7 @@ Run the entire backend, inference engine, and web workbench with one command fro
   bash deployment-script.sh
   ```
 
-Once launched, open `http://127.0.0.1:5000` in your browser to access the dual-pane inference workbench, interactive H.264 stream preview, normalized YOLOv8 `.zip` dataset exporter, and `Final_Report.pdf`.
+Once launched, open `http://localhost:5000` in your browser to access the dual-pane inference workbench, interactive H.264 stream preview, normalized YOLOv8 `.zip` dataset exporter, and `Final_Report.pdf`.
 
 ---
 
@@ -55,14 +55,46 @@ Peak all-class **F1 score is `0.79`** at confidence `0.289`. On Tesla T4 GPU inf
 
 ---
 
+## Project Structure & Where to Put Files
+
+Everything in the repository is organized into clear, single-purpose directories:
+
+```text
+Cotton-Weed-Prediction-Model/
+├── README.md                     # Primary project overview, benchmarks & references
+├── Final_Report.pdf              # Full 76-page thesis report
+├── model.pt                      # Production YOLOv8n checkpoint (best.pt)
+├── index.html                    # Zero-build workbench UI served at http://localhost:5000
+├── run.bat / deployment-script.sh # Single-command Windows & Linux/macOS launchers
+├── docs/                         # All detailed markdown documentation & preview assets
+│   ├── DEPLOYMENT.md             # Dev setup, Docker stack & smoke-test commands
+│   ├── Challenges_and_Solutions.md # Engineering challenges & resolutions log
+│   └── assets/                   # README visual previews
+├── media/                        # Input media & web workbench presets
+│   ├── put_images_here/          # Drop test .jpg / .png drone images here for CLI batch runs
+│   ├── put_mp4_videos_here/      # Drop test .mp4 / .avi drone videos here for frame extraction
+│   └── workbench_presets/        # Pre-loaded Flight 1 / 2 / 3 reference frames for the Web UI
+├── datasets/                     # Raw dataset images & matching YOLO .txt labels (gitignored data)
+│   ├── train/                    # images/ and labels/
+│   ├── val/                      # images/ and labels/
+│   └── test/                     # images/ and labels/ (place test split here)
+├── training/                     # Notebook, dataset YAML, metrics workbook, results/ curves & weights/
+├── scripts/                      # Portable CLI utilities (batch_inference.py, video_to_frames.py, dataset_stats.py, ...)
+├── backend/                      # Flask inference API, OpenCV/YOLOv8 pipeline & runtime data/
+└── frontend/                     # Optional Vite + React dev frontend (port 3000)
+```
+
+- **Running inference via the Web UI:** Launch the server and drag-and-drop any `.jpg`, `.png`, `.mp4`, or `.avi` directly into the browser workbench at `http://localhost:5000`.
+- **Running CLI batch scripts:** Place drone `.jpg`/`.png` files in `media/put_images_here/` (run `python scripts/batch_inference.py`), `.mp4` videos in `media/put_mp4_videos_here/` (run `python scripts/video_to_frames.py`), or YOLO evaluation splits in `datasets/test/images/` and `datasets/test/labels/` (run `python scripts/dataset_stats.py`).
+
 ## System Workflow & Architecture
 
 The application implements a three-tier containerized stack following RESTful API conventions [16], modular Flask request handling with thread locks (`_jobs_lock`) [18], OpenCV media processing (`video2image.py`, `convert.py`) [35], a React single-page interface [32, 33, 34], and reproducible Docker containerization [17, 30, 31]:
 
-1. **Startup Flow:** `run.bat` / `deployment-script.sh` -> Verify Python 3.10+, OpenCV, FFmpeg & `yolov8n.pt` -> Launch Flask API (`:5000`) + Web UI -> Open Workbench.
+1. **Startup Flow:** `run.bat` / `deployment-script.sh` -> Verify Python 3.10+, OpenCV, FFmpeg & `model.pt` -> Launch Flask API (`:5000`) + Web UI -> Open Workbench.
 2. **Inference Flow:** Upload Image/Video (`POST /api/upload`) -> YOLOv8n Frame Inference (`POST /api/process`) -> Compute Synchronized FPS (`Source FPS / N`) & Transcode `faststart` H.264 -> Inspect Side-by-Side & Export YOLO `.zip` Archive (`/api/download/dataset/<job_id>`).
 
-For full architectural diagrams, loss curves, and experimental discussion, read [Final_Report.pdf](Final_Report.pdf) or see [DEPLOYMENT.md](DEPLOYMENT.md).
+For full architectural diagrams, loss curves, and experimental discussion, read [Final_Report.pdf](Final_Report.pdf), [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), or [docs/Challenges_and_Solutions.md](docs/Challenges_and_Solutions.md).
 
 ---
 

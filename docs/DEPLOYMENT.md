@@ -69,7 +69,9 @@ Vite includes an automated rule forwarding any request starting with `/api` towa
 To run a smoke mock payload verification to ensure frames are successfully writing with correct permissions without triggering front end client streams:
 
 ```bash
-bash tools/test_backend.sh
+bash scripts/test_backend.sh
+bash scripts/check_deps.sh
+bash scripts/check_model.sh
 ```
 
 ---
