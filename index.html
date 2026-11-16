@@ -163,7 +163,7 @@
                       <span class="workbench-pane-tag">Raw Drone Feed</span>
                     </div>
                     <div class="workbench-viewport">
-                      <img id="rawImg" src="samples/uav_raw_field.png" alt="Original UAV aerial view" class="workbench-media" />
+                      <img id="rawImg" src="presets/uav_raw_field.png" alt="Original UAV aerial view" class="workbench-media" />
                       <video id="rawVideo" controls playsinline muted class="workbench-media" style="display: none;"></video>
                       <div class="workbench-overlay-caption">
                         <span id="rawMetaLabel">4K Flight Footage</span>
@@ -178,7 +178,7 @@
                       <span class="workbench-pane-tag tag-accent">AI Overlay</span>
                     </div>
                     <div class="workbench-viewport">
-                      <img id="annotatedImg" src="samples/uav_annotated_field.png" alt="YOLOv8 annotated UAV view" class="workbench-media" />
+                      <img id="annotatedImg" src="presets/uav_annotated_field.png" alt="YOLOv8 annotated UAV view" class="workbench-media" />
                       <video id="annotatedVideo" controls playsinline muted class="workbench-media" style="display: none;"></video>
                       <div class="workbench-overlay-caption">
                         <span id="legendCaption"><span style="color:#F2765E">■ weed 0.82</span> · <span style="color:#60a5fa">■ cotton 0.94</span></span>
@@ -798,8 +798,8 @@
       1: {
         title: 'Flight 1 — Low-Altitude Weed Cluster (18m AGL)',
         description: '4K aerial field pass isolating sparse inter-row weeds with zero cotton crop damage.',
-        raw: 'samples/uav_raw_field.png',
-        annotated: 'samples/uav_annotated_field.png',
+        raw: 'presets/uav_raw_field.png',
+        annotated: 'presets/uav_annotated_field.png',
         legendWeed: 'weed 0.82',
         legendCotton: 'cotton 0.94',
         stats: '14 weeds detected · 0 cotton damaged · Preset Demo',
@@ -809,8 +809,8 @@
       2: {
         title: 'Flight 2 — Dense Soil Boundary (15m AGL)',
         description: 'Sample pass demonstrating overlapping furrow weed emergence with dense multi-box detections.',
-        raw: 'samples/uav_raw_field.png',
-        annotated: 'samples/weed_cluster_08.jpg',
+        raw: 'presets/uav_raw_field.png',
+        annotated: 'presets/weed_cluster_08.jpg',
         legendWeed: 'weed 0.78',
         legendCotton: 'cotton 0.91',
         stats: '22 weeds detected · Multi-box clustering · Preset Demo',
@@ -820,8 +820,8 @@
       3: {
         title: 'Flight 3 — Validation Batch Rows',
         description: 'Full-canopy test split contrasting structured cotton rows (93.8% mAP@50) against furrow weeds (76.0%).',
-        raw: 'samples/cotton_row_tile.jpg',
-        annotated: 'samples/cotton_rows_val.jpg',
+        raw: 'presets/cotton_row_tile.jpg',
+        annotated: 'presets/cotton_rows_val.jpg',
         legendWeed: 'weed 0.76',
         legendCotton: 'cotton 0.94',
         stats: 'Cotton mAP 93.8% · Weed mAP 76.0% · Preset Demo',
@@ -834,7 +834,7 @@
     let activePollTimer = null;
     let currentExports = {
       videoUrl: null,
-      snapUrl: 'samples/uav_annotated_field.png',
+      snapUrl: 'presets/uav_annotated_field.png',
       zipUrl: null
     };
 

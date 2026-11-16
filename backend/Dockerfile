@@ -20,9 +20,13 @@ RUN pip install --upgrade pip
 COPY backend/requirements.txt /app/backend/
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
-# Copy the backend source code and the model file
+# Copy the backend source code, model weights, web UI, and preset media
 COPY backend/ /app/backend/
 COPY model.pt /app/
+COPY index.html /app/
+COPY Final_Report.pdf /app/
+COPY media/workbench_presets/ /app/media/workbench_presets/
+COPY frontend/public/ /app/frontend/public/
 
 # Set the Python path to include the /app directory
 ENV PYTHONPATH=/app

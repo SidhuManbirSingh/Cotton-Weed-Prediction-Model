@@ -297,8 +297,8 @@ export default function App() {
   const presets = {
     flight1: {
       name: 'Flight 1 — Low-Altitude Weed Cluster (18m AGL)',
-      raw: '/samples/uav_raw_field.png',
-      annotated: '/samples/uav_annotated_field.png',
+      raw: '/presets/uav_raw_field.png',
+      annotated: '/presets/uav_annotated_field.png',
       description: '4K aerial field pass isolating sparse inter-row weeds with zero false-positive cotton damage.',
       legendWeed: 'weed 0.82',
       legendCotton: 'cotton 0.94',
@@ -307,8 +307,8 @@ export default function App() {
     },
     flight2: {
       name: 'Flight 2 — Dense Soil Boundary (15m AGL)',
-      raw: '/samples/uav_raw_field.png',
-      annotated: '/samples/weed_cluster_08.jpg',
+      raw: '/presets/uav_raw_field.png',
+      annotated: '/presets/weed_cluster_08.jpg',
       description: 'Sample pass demonstrating overlapping furrow weed emergence with dense multi-box detections.',
       legendWeed: 'weed 0.78',
       legendCotton: 'cotton 0.91',
@@ -317,8 +317,8 @@ export default function App() {
     },
     flight3: {
       name: 'Flight 3 — Validation Batch Rows',
-      raw: '/samples/cotton_row_tile.jpg',
-      annotated: '/samples/cotton_rows_val.jpg',
+      raw: '/presets/cotton_row_tile.jpg',
+      annotated: '/presets/cotton_rows_val.jpg',
       description: 'Full-canopy test split contrasting structured cotton rows (93.8% mAP@50) against furrow weeds (76.0%).',
       legendWeed: 'weed 0.76',
       legendCotton: 'cotton 0.94',

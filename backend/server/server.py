@@ -373,9 +373,10 @@ def _send_project_file(*rel_parts: str, mimetype: str | None = None):
     abort(404)
 
 
+@app.route("/presets/<path:filepath>", methods=["GET"])
 @app.route("/samples/<path:filepath>", methods=["GET"])
-def serve_samples_static(filepath: str):
-    return _send_project_file("samples", filepath)
+def serve_presets_static(filepath: str):
+    return _send_project_file("media", "workbench_presets", filepath)
 
 
 @app.route("/favicon.svg", methods=["GET"])
